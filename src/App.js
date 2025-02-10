@@ -14,8 +14,8 @@ function App() {
         </header>
         <main className="App-main">
           <Routes>
-            <Route path="/" element={<Game />} />
-            <Route path="/game" element={<Lobby />} />
+            <Route path="/" element={<Lobby />} />
+            <Route path="/game" element={<Game />} />
             {/* <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} /> */}
           </Routes>
