@@ -1,10 +1,12 @@
+import "./CreateRoomForm.css";
+
 import { useState } from "react";
 
 export const CreateRoomForm = () => {
   const [roomType, setRoomType] = useState("public");
 
   return (
-    <form>
+    <form className="CreateRoomForm">
       <div className="mb-3">
         <label className="form-label">Nome da Sala</label>
         <input type="text" className="form-control" required />

@@ -1,22 +1,27 @@
 import './App.css';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from './componentes/Navbar';
 import RoomTabs from './componentes/RoomTabs';
+import Lobby from './pages/Lobby';
+import Game from './pages/Game';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <Navbar />
-      </header>
-      <main className="App-main">
-        <div className="container d-grid gap-2 w-75 p-3 mt-2">
-          <p>Lobby</p>
-        </div>
-        <div className="container w-75 p-0 mt-4">
-          <RoomTabs />
-        </div>
-      </main>
-    </div>
+    <Router>
+      <div className="App">
+        <header className="App-header">
+          <Navbar />
+        </header>
+        <main className="App-main">
+          <Routes>
+            <Route path="/" element={<Game />} />
+            <Route path="/game" element={<Lobby />} />
+            {/* <Route path="/about" element={<About />} />
+            <Route path="*" element={<NotFound />} /> */}
+          </Routes>
+        </main>
+      </div>
+    </Router>
   );
 }
 

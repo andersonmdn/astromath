@@ -1,8 +1,6 @@
 .App {
   text-align: center;
   font-family: "Lexend", sans-serif;
-  /* font-weight: bold; */
-  /* font-size: 1.8rem; */
   color: #FFFFFF;
 }
 
@@ -10,22 +8,8 @@
   color: #FFFFFF;
 }
 
-/* button {
-  font-size: 1.4rem !important;
-} */
 
-.App-main div:first-child p {
-  text-align: left;
-  /* border: 1px solid #ffffff; */
-  font-size: 36px;
-  font-weight: bold;
-}
-
-.App-main div:last-child {
-  text-align: left;
-  /* border: 1px solid #ff0000; */
-}
-
+/* Input */
 .App input {
   background-color: #1C1F26;
   border: 1px solid #3D4054;
