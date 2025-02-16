@@ -66,10 +66,41 @@ function preloadAssets() {
   });
 }
 
+// Função para criar texto
+function createTextLayout(scene, width, height) {
+  scene.add.text((width / 2) / 2, 20, `Player 1 - Naves Restantes`, {
+    fontSize: "20px",
+    fontFamily: "Lexend",
+    fill: "#50FA7B",
+    align: "center",
+  }).setOrigin(0.5, 0.5);
+
+  const fontConfigCounter = {
+    fontSize: "20px",
+    fontFamily: "Lexend",
+    fill: "#50FA7B",
+    align: "center",
+  }
+
+  scene.add.image(((width / 2) / 5) * 1, 60, "ship_red").setScale(0.5).setOrigin(0.5, 0.5);
+  scene.add.text(((width / 2) / 5) * 1, 100, `x 3`, fontConfigCounter).setOrigin(0.5, 0.5);
+
+  scene.add.image(((width / 2) / 5) * 2, 60, "ship_black").setScale(0.5).setOrigin(0.5, 0.5);
+  scene.add.text(((width / 2) / 5) * 2, 100, `x 3`, fontConfigCounter).setOrigin(0.5, 0.5);
+
+  scene.add.image(((width / 2) / 5) * 3, 60, "ship_green").setScale(0.5).setOrigin(0.5, 0.5);
+  scene.add.text(((width / 2) / 5) * 3, 100, `x 3`, fontConfigCounter).setOrigin(0.5, 0.5);
+
+  scene.add.image(((width / 2) / 5) * 4, 60, "ship_blue").setScale(0.5).setOrigin(0.5, 0.5);
+  scene.add.text(((width / 2) / 5) * 4, 100, `x 3`, fontConfigCounter).setOrigin(0.5, 0.5);
+}
+
 // Função para criar objetos do jogo
 function createGameObjects() {
   const { width, height } = this.sys.game.config;
   this.cameras.main.setBackgroundColor("#000015");
+
+  createTextLayout(this, width, height)
 
   // Adiciona estrelas ao fundo
   createStars(this, width, height);
@@ -141,7 +172,7 @@ function createShootingStars(scene, width, height) {
 
 // Função para desenhar círculos e linhas
 function drawCirclesAndLines(scene, width, height) {
-  const graphics = scene.add.graphics({ lineStyle: { width: 1, color: 0xffffff } });
+  const graphics = scene.add.graphics({ lineStyle: { width: 1, color: 0x50FA7B } });
   const centerX = width / 2;
   const centerY = height / 2;
   const radii = [90, 150, 200];
