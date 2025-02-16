@@ -14,21 +14,30 @@ export const Game = () => {
       parent: "game-container",
       scene: {
         preload: function () {
-          this.load.image("star", "https://labs.phaser.io/assets/demoscene/star2.png"); // ⭐ Estrela
-          this.load.image("shootingStar", "https://labs.phaser.io/assets/particles/yellow.png"); // 🌠 Estrela cadente
-          this.load.image("sky", "https://labs.phaser.io/assets/skies/space4.png");
-          this.load.image("ship", "https://labs.phaser.io/assets/sprites/ufo.png"); // 🔵 Imagem da "nave"
+          this.load.setCORS("anonymous");
+          this.load.image("star", "/assets/star2.png");
+          this.load.image("shootingStar", "/assets/yellow.png");
+          this.load.spritesheet("explosion", "/assets/explosion.png", {
+            frameWidth: 82,  // Ajuste para o tamanho correto dos frames
+            frameHeight: 72
+          });
+          this.load.image("meteor", "/assets/kenney_space-shooter-redux/PNG/Meteors/meteorBrown_big1.png");
+          this.load.image("blackHole", "/assets/kenney_planets/Parts/sphere2.png");
+          this.load.image("ship", "/assets/kenney_space-shooter-redux/PNG/playerShip1_blue.png");
+          this.load.image("button", "/assets/kenney_ui-pack/PNG/Red/Double/button_rectangle_depth_flat.png");
         },
         create: function () {
           this.cameras.main.setBackgroundColor("#000015"); // 🌌 Fundo escuro
 
           const graphics = this.add.graphics({ lineStyle: { width: 1, color: 0xffffff } });
-          
+          const button = this.add.image(100, 760, "button").setInteractive().setScale(0.5);;
+
           const extraLineLength = 35; // 🔥 Tamanho extra da linha para melhor visualização
           const centerX = 500; // Novo centro do jogo
           const centerY = 400;
           const radii = [100, 150, 200]; // 🔥 Lista de raios dos círculos
           const points = []; // 🔥 Lista de pontos para colocar a nave
+          const ships = []; // 🔥 Lista de naves
           
           // ⭐ Adiciona estrelas ao fundo
           const stars = this.add.group();
@@ -105,13 +114,58 @@ export const Game = () => {
           const placeShip = (circle, angle) => {
             const point = points.find(p => p.circle === circle && p.angle === angle);
             if (point) {
-              this.add.image(point.x, point.y, "ship").setScale(1.5).setOrigin(0.5, 0.5);
+              this.add.image(point.x, point.y, "ship").setScale(0.5).setOrigin(0.5, 0.5);
+
+              ships.push({ circle: circle, angle: angle, x: point.x, y: point.y });
             }
           };
+
+          this.anims.create({
+            key: "explode",
+            frames: this.anims.generateFrameNumbers("explosion", { start: 0, end: 7 }),
+            frameRate: 16,
+            repeat: 0,
+          });
+
+          const handleCollision = (circle, angle) => {
+            const point = points.find(p => p.circle === circle && p.angle === angle);
+            if (!point) return;
+      
+            let existingShip = ships.find(s => s.circle === circle && s.angle === angle);
+      
+            if (existingShip) {
+              console.log("Nave já existe no ponto", point);
+              // 🚀 Nave atingida → Explosão e dano
+              this.add.sprite(existingShip.x, existingShip.y, "explosion").play("explode").on("animationcomplete", (anim, frame, sprite) => {
+                sprite.destroy();
+              });
+              
+              
+
+            } else {
+              // ☄️ Adiciona meteoro ou buraco negro
+              let objectType = Phaser.Math.RND.pick(["meteor", "blackHole"]);
+              let newObject = this.add.image(point.x, point.y, objectType).setScale(0.7);
+
+              console.log("Novo objeto criado:", newObject);  // 🔍 Debug para verificar se o objeto existe
+
+              if (newObject) {  // ✅ Garante que `newObject` existe antes de animá-lo
+                this.time.delayedCall(3000, () => {
+                  if (newObject) newObject.destroy();  // ✅ Garante que o objeto existe antes de destruí-lo
+                });
+              } else {
+                console.warn("Falha ao criar o objeto", objectType);
+              }
+            }
+          }
 
           // 🛸 Posiciona naves nos exemplos dados
           placeShip(1, 30);  // Primeiro Círculo, ângulo 30°
           placeShip(3, 150); // Terceiro Círculo, ângulo 150°
+
+          button.on("pointerdown", () => {
+            handleCollision(3, 150);
+          });
         },
       },
     };
