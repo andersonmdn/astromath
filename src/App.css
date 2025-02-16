@@ -2,6 +2,10 @@
   text-align: center;
   font-family: "Lexend", sans-serif;
   color: #FFFFFF;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
 }
 
 .App-header {
@@ -19,4 +23,8 @@
 .App input:focus {
   background-color: inherit;
   color: #FFFFFF;
+}
+
+.App-main {
+  flex-grow: 1;
 }

@@ -1,3 +1,4 @@
+import "./Game.css";
 import React, { useEffect, useRef } from "react";
 import Phaser from "phaser";
 
@@ -7,10 +8,17 @@ export const Game = () => {
   useEffect(() => {
     if (gameRef.current) return; // Evita recriação do jogo
 
+    const parentElement = document.getElementById("game-container");
+    const margin = 8; // Margem para evitar scrollbars
+
+    console.log("Parent element", parentElement.clientWidth, parentElement.clientHeight);
+    console.log("Window size", window.innerWidth, window.innerHeight);
+    console.log("Calc", Math.max(800, parentElement.clientWidth), Math.max(800, parentElement.clientHeight));
+    
     const config = {
       type: Phaser.AUTO,
-      width: 1000, // 🔥 Aumentado o tamanho do mapa
-      height: 800,
+      width: Math.max(800, parentElement.clientWidth) - margin, // 🔥 Aumentado o tamanho do mapa
+      height: Math.max(800, parentElement.clientHeight) - margin, // 🔥 Aumentado o tamanho do mapa
       parent: "game-container",
       scene: {
         preload: function () {
@@ -24,7 +32,7 @@ export const Game = () => {
             frameHeight: 72
           });
           this.load.image("meteor", "/assets/kenney_space-shooter-redux/PNG/Meteors/meteorBrown_big1.png");
-          this.load.image("blackHole", "/assets/kenney_planets/Parts/sphere2.png");
+          this.load.image("blackhole", "/assets/kenney_planets/Parts/sphere2.png");
           this.load.image("ship", "/assets/kenney_space-shooter-redux/PNG/playerShip1_blue.png");
           this.load.image("button", "/assets/kenney_ui-pack/PNG/Red/Double/button_rectangle_depth_flat.png");
         },
@@ -39,7 +47,6 @@ export const Game = () => {
           const centerY = 400;
           const radii = [100, 150, 200]; // 🔥 Lista de raios dos círculos
           const points = []; // 🔥 Lista de pontos para colocar a nave
-          const ships = []; // 🔥 Lista de naves
           
           // ⭐ Adiciona estrelas ao fundo
           const stars = this.add.group();
@@ -107,7 +114,7 @@ export const Game = () => {
               const x = centerX + Math.cos(radians) * radius;
               const y = centerY + Math.sin(radians) * radius;
 
-              points.push({ circle: index + 1, angle, x, y });
+              points.push({ circle: index + 1, angle, x, y, occupied: false, ship: false });
 
               if (index === radii.length - 1) {
                 // 🔴 Ajusta as linhas para passarem um pouco do círculo
@@ -126,16 +133,29 @@ export const Game = () => {
                   align: "center",
                 }).setOrigin(0.5, 0.5);
               }
+
+              const pointObject = this.add.zone(x, y, 45, 45).setInteractive();
+              // const circle = this.add.graphics();
+              // circle.fillStyle(0xff0000, 1); // Cor do círculo (vermelho) e alpha (1 = totalmente opaco)
+              // circle.fillCircle(x, y, 25); // (x, y) é o centro do círculo, radius é o raio
+              
+              pointObject.on('pointerdown', () => {
+                console.log(`Clicou no ponto ${angle} e circulo ${index + 1}°`);
+                handleCollision(index + 1, angle);
+              });
             }
           });
 
           // 🔥 Função para posicionar uma nave em um ponto específico
           const placeShip = (circle, angle) => {
             const point = points.find(p => p.circle === circle && p.angle === angle);
-            if (point) {
-              this.add.image(point.x, point.y, "ship").setScale(0.5).setOrigin(0.5, 0.5);
+            if (point && !point.occupied) {
+              this.add.image(point.x, point.y, "ship").setScale(0.5).setOrigin(0.5, 0.5)
 
-              ships.push({ circle: circle, angle: angle, x: point.x, y: point.y });
+              point.occupied = true;
+              point.ship = true;
+            } else {
+              console.log("Ponto ocupado ou não existe", point);
             }
           };
 
@@ -150,18 +170,16 @@ export const Game = () => {
             const point = points.find(p => p.circle === circle && p.angle === angle);
             if (!point) return;
       
-            let existingShip = ships.find(s => s.circle === circle && s.angle === angle);
-      
-            if (existingShip) {
+            if (point.ship) {
               console.log("Nave já existe no ponto", point);
               // 🚀 Nave atingida → Explosão e dano
-              this.add.sprite(existingShip.x, existingShip.y, "explosion").on("animationstart", () => {
+              this.add.sprite(point.x, point.y, "explosion").on("animationstart", () => {
                 this.sound.play("laser2");
 
                 const randomX = Phaser.Math.Between(0, this.scale.width);
                 const randomY = Phaser.Math.Between(0, this.scale.height);
                 
-                createLaser(randomX, 0 - 100, existingShip.x, existingShip.y);
+                createLaser(randomX, 0 - 100, point.x, point.y);
               }).play("explode").on("animationcomplete", (anim, frame, sprite) => {
                 sprite.destroy();
               });
@@ -169,18 +187,17 @@ export const Game = () => {
 
             } else {
               // ☄️ Adiciona meteoro ou buraco negro
-              let objectType = Phaser.Math.RND.pick(["meteor", "blackHole"]);
-              let newObject = this.add.image(point.x, point.y, objectType).setScale(0.7);
+              let newObject = this.add.image(point.x, point.y, "meteor").setScale(0.5);
 
-              console.log("Novo objeto criado:", newObject);  // 🔍 Debug para verificar se o objeto existe
+              let rotationSpeed = 0.005;
 
-              if (newObject) {  // ✅ Garante que `newObject` existe antes de animá-lo
-                this.time.delayedCall(3000, () => {
-                  if (newObject) newObject.destroy();  // ✅ Garante que o objeto existe antes de destruí-lo
-                });
-              } else {
-                console.warn("Falha ao criar o objeto", objectType);
-              }
+              this.time.addEvent({
+                delay: 1000 / 60, // 60fps
+                callback: () => {
+                  newObject.rotation += rotationSpeed;
+                },
+                loop: true
+              });
             }
           }
 
@@ -189,15 +206,26 @@ export const Game = () => {
           placeShip(3, 150); // Terceiro Círculo, ângulo 150°
 
           button.on("pointerdown", () => {
-            handleCollision(3, 150);
+            handleCollision(2, 150);
           });
         },
       },
     };
 
+    const handleResize = () => {
+      gameRef.current.scale.resize(800, 800);
+      const newWidth = parentElement.clientWidth - margin;
+      const newHeight = parentElement.clientHeight - margin;
+      gameRef.current.scale.resize(newWidth, newHeight);
+      console.log("Resize", newWidth, newHeight)
+    };
+
+    window.addEventListener("resize", handleResize);
+
     gameRef.current = new Phaser.Game(config);
 
     return () => {
+      window.removeEventListener("resize", handleResize);
       gameRef.current.destroy(true);
       gameRef.current = null;
     };
