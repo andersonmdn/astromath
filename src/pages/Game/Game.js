@@ -15,6 +15,8 @@ export const Game = () => {
       scene: {
         preload: function () {
           this.load.setCORS("anonymous");
+          this.load.image("laser", "/assets/kenney_space-shooter-redux/PNG/Lasers/laserRed01.png");
+          this.load.audio("laser2", "/assets/kenney_space-shooter-redux/Bonus/sfx_laser2.ogg");
           this.load.image("star", "/assets/star2.png");
           this.load.image("shootingStar", "/assets/yellow.png");
           this.load.spritesheet("explosion", "/assets/explosion.png", {
@@ -78,6 +80,23 @@ export const Game = () => {
             }
           });
 
+          const createLaser = (startX, startY, targetX, targetY) => {
+            const angle = Phaser.Math.Angle.Between(startX, startY, targetX, targetY) + Phaser.Math.DEG_TO_RAD * 90;
+        
+            const laser = this.add.sprite(startX, startY, "laser")
+                .setOrigin(0, 0.5)
+                .setRotation(angle);
+        
+            this.tweens.add({
+                targets: laser,
+                x: targetX,
+                y: targetY,
+                duration: 200, // Tempo para alcançar o alvo (ajuste conforme necessário)
+                onComplete: () => laser.destroy() // Destroi após atingir o alvo
+            });
+          };
+        
+        
 
           // 🔵 Desenha os círculos e coleta os pontos de interseção
           radii.forEach((radius, index) => {
@@ -136,10 +155,16 @@ export const Game = () => {
             if (existingShip) {
               console.log("Nave já existe no ponto", point);
               // 🚀 Nave atingida → Explosão e dano
-              this.add.sprite(existingShip.x, existingShip.y, "explosion").play("explode").on("animationcomplete", (anim, frame, sprite) => {
+              this.add.sprite(existingShip.x, existingShip.y, "explosion").on("animationstart", () => {
+                this.sound.play("laser2");
+
+                const randomX = Phaser.Math.Between(0, this.scale.width);
+                const randomY = Phaser.Math.Between(0, this.scale.height);
+                
+                createLaser(randomX, 0 - 100, existingShip.x, existingShip.y);
+              }).play("explode").on("animationcomplete", (anim, frame, sprite) => {
                 sprite.destroy();
               });
-              
               
 
             } else {
