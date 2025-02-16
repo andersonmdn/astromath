@@ -20,7 +20,9 @@ const points = [];
 const assets = {
   images: {
     laser: "/assets/kenney_space-shooter-redux/PNG/Lasers/laserRed01.png",
-    star: "/assets/kenney_space-shooter-redux/PNG/Effects/star2.png",
+    star_1: "/assets/kenney_space-shooter-redux/PNG/Effects/star1.png",
+    star_2: "/assets/kenney_space-shooter-redux/PNG/Effects/star2.png",
+    star_3: "/assets/kenney_space-shooter-redux/PNG/Effects/star3.png",
     shootingStar: "/assets/yellow.png",
     meteor: "/assets/kenney_space-shooter-redux/PNG/Meteors/meteorBrown_big1.png",
     blackhole: "/assets/kenney_planets/Parts/sphere2.png",
@@ -29,6 +31,15 @@ const assets = {
     ship_black: "/assets/kenney_space-shooter-redux/PNG/Enemies/enemyBlack3.png",
     ship_green: "/assets/kenney_space-shooter-redux/PNG/Enemies/enemyGreen4.png",
     button: "/assets/kenney_ui-pack/PNG/Red/Double/button_rectangle_depth_flat.png",
+    cloud_1: "/assets/kenney_background-elements/PNG/cloud1.png",
+    cloud_2: "/assets/kenney_background-elements/PNG/cloud2.png",
+    cloud_3: "/assets/kenney_background-elements/PNG/cloud3.png",
+    cloud_4: "/assets/kenney_background-elements/PNG/cloud4.png",
+    cloud_5: "/assets/kenney_background-elements/PNG/cloud5.png",
+    cloud_6: "/assets/kenney_background-elements/PNG/cloud6.png",
+    cloud_7: "/assets/kenney_background-elements/PNG/cloud7.png",
+    cloud_8: "/assets/kenney_background-elements/PNG/cloud8.png",
+    cloud_9: "/assets/kenney_background-elements/PNG/cloud9.png",
   },
   spritesheets: {
     explosion: {
@@ -95,15 +106,66 @@ function createTextLayout(scene, width, height) {
   scene.add.text(((width / 2) / 5) * 4, 100, `x 3`, fontConfigCounter).setOrigin(0.5, 0.5);
 }
 
+function createSky(scene) {
+  const gradient = scene.add.graphics();
+  const width = scene.sys.game.config.width;
+  const height = scene.sys.game.config.height;
+
+  // Cria um gradiente vertical (de azul escuro para preto)
+  const fillStyle = gradient.fillGradientStyle(
+    0x000033, // Azul escuro (topo)
+    0x000000, // Preto (base)
+    1, // Alpha do topo
+    1, // Alpha da base
+    true // Gradiente vertical
+  );
+
+  gradient.fillRect(0, 0, width, height); // Preenche a tela com o gradiente
+}
+
+function createClouds(scene) {
+  const clouds = scene.add.group();
+  const width = scene.sys.game.config.width;
+  const height = scene.sys.game.config.height;
+
+  for (let i = 0; i < 5; i++) {
+    const randomCloudIndex = Phaser.Math.Between(1, 9);
+    const cloudTexture = `cloud_${randomCloudIndex}`;
+
+    const cloud = scene.add.sprite(
+      Phaser.Math.Between(-width, width), // Posição X aleatória
+      Phaser.Math.Between(0, height / 2), // Posição Y aleatória
+      cloudTexture // Textura da nuvem
+    ).setScale(Phaser.Math.FloatBetween(0.5, 1.5)).setAlpha(0.1); // Tamanho aleatório
+
+    clouds.add(cloud);
+
+    // Movimento da nuvem
+    scene.tweens.add({
+      targets: cloud,
+      x: width + cloud.width, // Move a nuvem para a direita
+      duration: Phaser.Math.Between(10000, 20000), // Duração aleatória
+      ease: 'Linear',
+      repeat: -1, // Repete infinitamente
+      yoyo: false,
+      delay: Phaser.Math.Between(0, 5000) // Delay aleatório
+    });
+  }
+}
+
 // Função para criar objetos do jogo
 function createGameObjects() {
   const { width, height } = this.sys.game.config;
+  const stars = this.add.group();
   this.cameras.main.setBackgroundColor("#000015");
 
-  createTextLayout(this, width, height)
+  createSky(this);
+  createClouds(this);
+
+  createTextLayout(this, width, height);
 
   // Adiciona estrelas ao fundo
-  createStars(this, width, height);
+  createStars(this, stars, width, height);
 
   // Adiciona estrelas cadentes
   createShootingStars(this, width, height);
@@ -128,24 +190,74 @@ function createGameObjects() {
   createAnimations(this);
 }
 
+// Função para criar uma estrela
+function createStar(scene, stars, width, height) {
+  // Escolhe uma textura aleatória para a estrela
+  const starTexture = Phaser.Utils.Array.GetRandom(['star_1', 'star_2', 'star_3']);
+
+  // Cria a estrela
+  const star = scene.add.sprite(
+    Phaser.Math.Between(0, width), // Posição X aleatória
+    Phaser.Math.Between(0, height), // Posição Y aleatória
+    starTexture // Textura da estrela
+  ).setScale(Phaser.Math.FloatBetween(0.1, 0.5)) // Tamanho aleatório
+   .setAlpha(Phaser.Math.FloatBetween(0.3, 1)); // Opacidade inicial aleatória
+
+  stars.add(star);
+
+  // Animação de piscar para a estrela
+  animateStar(scene, star);
+}
+
 // Função para criar estrelas de fundo
-function createStars(scene, width, height) {
-  const stars = scene.add.group();
-  for (let i = 0; i < 500; i++) {
-    const star = scene.add.image(
-      Phaser.Math.Between(0, width),
-      Phaser.Math.Between(0, height),
-      "star"
-    ).setScale(Phaser.Math.FloatBetween(0.1, 0.3)).setAlpha(Phaser.Math.FloatBetween(0.3, 1));
-    stars.add(star);
+function createStars(scene, stars, width, height) {
+  for (let i = 0; i < 200; i++) {
+    createStar(scene, stars, width, height); // Cria uma estrela
   }
 
+  // Timer para destruir e recriar estrelas
   scene.time.addEvent({
-    delay: 10,
+    delay: 5000, // Intervalo de 5 segundos
     loop: true,
     callback: () => {
-      Phaser.Utils.Array.GetRandom(stars.getChildren()).setAlpha(Phaser.Math.FloatBetween(0.3, 1));
-    },
+      destroyAndCreateStars(scene, stars); // Destrói e cria novas estrelas
+    }
+  });
+}
+
+// Função para destruir e criar novas estrelas
+function destroyAndCreateStars(scene, stars, width, height) {
+  // Destrói algumas estrelas aleatoriamente
+  const starsToDestroy = Phaser.Math.Between(10, 30); // Número de estrelas a destruir
+  for (let i = 0; i < starsToDestroy; i++) {
+    const star = Phaser.Utils.Array.GetRandom(stars.getChildren());
+    if (star) {
+      star.destroy(); // Destrói a estrela
+      stars.remove(star); // Remove do grupo
+    }
+  }
+
+  // Cria novas estrelas
+  const starsToCreate = starsToDestroy; // Cria o mesmo número de estrelas destruídas
+  for (let i = 0; i < starsToCreate; i++) {
+    createStar(scene, stars); // Cria uma nova estrela
+  }
+}
+
+function animateStar(scene, star) {
+  // Define a duração e o atraso da animação de forma aleatória
+  const duration = Phaser.Math.Between(500, 2000); // Duração da animação
+  const delay = Phaser.Math.Between(0, 3000); // Atraso antes de começar
+
+  // Animação de piscar (fade in e fade out)
+  scene.tweens.add({
+    targets: star,
+    alpha: { from: 0.3, to: 1 }, // Variação da opacidade
+    duration: duration,
+    yoyo: true, // Repete a animação (fade in e fade out)
+    repeat: -1, // Repete infinitamente
+    delay: delay, // Atraso antes de começar
+    ease: 'Sine.easeInOut' // Easing suave
   });
 }
 
