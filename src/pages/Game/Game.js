@@ -40,6 +40,11 @@ const assets = {
     cloud_7: "/assets/kenney_background-elements/PNG/cloud7.png",
     cloud_8: "/assets/kenney_background-elements/PNG/cloud8.png",
     cloud_9: "/assets/kenney_background-elements/PNG/cloud9.png",
+    planning: "/assets/kenney_board-game-icons/PNG/Default (64px)/shield.png",
+    attacking: "/assets/kenney_board-game-icons/PNG/Default (64px)/sword.png",
+    receiving_attacking_1: "/assets/kenney_board-game-icons/PNG/Default (64px)/hourglass_top.png",
+    receiving_attacking_2: "/assets/kenney_board-game-icons/PNG/Default (64px)/hourglass.png",
+    receiving_attacking_3: "/assets/kenney_board-game-icons/PNG/Default (64px)/hourglass_bottom.png",
   },
   spritesheets: {
     explosion: {
@@ -93,17 +98,56 @@ function createTextLayout(scene, width, height) {
     align: "center",
   }
 
+  const countTypes = (type) => points.filter(point => point.type === type).length;
+
+  const redCount = countTypes("red");
+  const blackCount = countTypes("black");
+  const blueCount = countTypes("blue");
+  const greenCount = countTypes("green");
+
   scene.add.image(((width / 2) / 5) * 1, 60, "ship_red").setScale(0.5).setOrigin(0.5, 0.5);
-  scene.add.text(((width / 2) / 5) * 1, 100, `x 3`, fontConfigCounter).setOrigin(0.5, 0.5);
+  const redCountText = scene.add.text(((width / 2) / 5) * 1, 100, `x ${redCount}`, fontConfigCounter).setOrigin(0.5, 0.5);
+  redCountText.nome = "red";
 
   scene.add.image(((width / 2) / 5) * 2, 60, "ship_black").setScale(0.5).setOrigin(0.5, 0.5);
-  scene.add.text(((width / 2) / 5) * 2, 100, `x 3`, fontConfigCounter).setOrigin(0.5, 0.5);
+  const blackCountText = scene.add.text(((width / 2) / 5) * 2, 100, `x ${blackCount}`, fontConfigCounter).setOrigin(0.5, 0.5);
+  blackCountText.nome = "black";
 
   scene.add.image(((width / 2) / 5) * 3, 60, "ship_green").setScale(0.5).setOrigin(0.5, 0.5);
-  scene.add.text(((width / 2) / 5) * 3, 100, `x 3`, fontConfigCounter).setOrigin(0.5, 0.5);
+  const greenCountText = scene.add.text(((width / 2) / 5) * 3, 100, `x ${greenCount}`, fontConfigCounter).setOrigin(0.5, 0.5);
+  greenCountText.nome = "green";
 
   scene.add.image(((width / 2) / 5) * 4, 60, "ship_blue").setScale(0.5).setOrigin(0.5, 0.5);
-  scene.add.text(((width / 2) / 5) * 4, 100, `x 3`, fontConfigCounter).setOrigin(0.5, 0.5);
+  const blueCountText = scene.add.text(((width / 2) / 5) * 4, 100, `x ${blueCount}`, fontConfigCounter).setOrigin(0.5, 0.5);
+  blueCountText.nome = "blue";
+
+  scene.textCounts.add(redCountText);
+  scene.textCounts.add(blackCountText);
+  scene.textCounts.add(greenCountText);
+  scene.textCounts.add(blueCountText);
+}
+
+function updateTexts(scene) {
+  const countTypes = (type) => points.filter(point => point.type === type && point.alive).length;
+
+  const newRedCount = countTypes("red");
+  const newBlackCount = countTypes("black");
+  const newBlueCount = countTypes("blue");
+  const newGreenCount = countTypes("green");
+
+  const textsCounts = scene.textCounts.getChildren();
+
+  textsCounts.forEach((text) => {
+    if (text.nome.includes("red")) {
+      text.setText(`x ${newRedCount}`);
+    } else if (text.nome.includes("black")) {
+      text.setText(`x ${newBlackCount}`);
+    } else if (text.nome.includes("blue")) {
+      text.setText(`x ${newBlueCount}`);
+    } else if (text.nome.includes("green")) {
+      text.setText(`x ${newGreenCount}`);
+    }
+  });
 }
 
 function createSky(scene) {
@@ -153,22 +197,128 @@ function createClouds(scene) {
   }
 }
 
+function animateHourglass(scene, first, middle, end) {
+  // scene.time.delayedCall(5000, () => animateImages(images)); // Reinicia após 5 segundos
+
+  scene.tweens.add({
+    targets: first,
+    alpha: 100, // Fade out
+    duration: 1000, // Duração de 1 segundo
+    delay: 0, // Espera 2 segundos antes de começar,
+    onComplete: () => {
+      first.setAlpha(0)
+    },
+    repeat: -1,
+    repeatDelay: 2000
+  });
+
+  scene.tweens.add({
+    targets: middle,
+    alpha: 100, // Fade out
+    duration: 1000, // Duração de 1 segundo
+    delay: 1000, // Espera 2 segundos antes de começar
+    onComplete: () => {
+      middle.setAlpha(0)
+    },
+    repeat: -1,
+    repeatDelay: 2000
+  });
+
+  scene.tweens.add({
+    targets: end,
+    alpha: 100, // Fade out
+    duration: 1000, // Duração de 1 segundo
+    delay: 2000, // Espera 2 segundos antes de começar
+    angle: 180, // Gira 360 graus
+    onComplete: () => {
+      end.setAlpha(0)
+    },
+    repeat: -1,
+    repeatDelay: 2000
+  });
+}
+
+function createGameStatusLayout(scene, width, height) {
+  const textGameStatus = scene.add.text(width / 2, 50, "Planejamento", {
+    fontSize: "20px",
+    fontFamily: "Lexend",
+    fill: "#FFB86C",
+    align: "center",
+  }).setOrigin(0.5, 0.5);
+
+  console.log(textGameStatus);
+
+  const receivingAttacking1 = scene.add.image(textGameStatus.x - textGameStatus.width + 40, textGameStatus.y, "receiving_attacking_1").setScale(0.5).setOrigin(0.5, 0.5).setAlpha(0);
+  const receivingAttacking2 = scene.add.image(textGameStatus.x - textGameStatus.width + 40, textGameStatus.y, "receiving_attacking_2").setScale(0.5).setOrigin(0.5, 0.5).setAlpha(0);
+  const receivingAttacking3 = scene.add.image(textGameStatus.x - textGameStatus.width + 40, textGameStatus.y, "receiving_attacking_3").setScale(0.5).setOrigin(0.5, 0.5).setAlpha(0);
+  
+  animateHourglass(scene, receivingAttacking1, receivingAttacking2, receivingAttacking3);
+  
+  // scene.tweens.add({
+  //     targets: skull,
+  //     x: skull.x + Phaser.Math.Between(-2, 2), // Move 2 pixels para a direita
+  //     y: skull.y + Phaser.Math.Between(-2, 2), // Move 2 pixels para baixo
+  //     duration: 25, // Duração do movimento
+  //     yoyo: true, // Volta à posição original
+  //     repeat: -1, // Repete 5 vezes
+  //     repeatDelay: 1000, // Atraso entre repetições
+  // });
+
+  function createSword(scene, x, y, flipX = false, alpha = 1) {
+    const sword = scene.add.image(x, y, "attacking")
+        .setScale(0.5)
+        .setOrigin(0.5, 0.5)
+        .setFlipX(flipX)
+        .setAlpha(alpha);
+    return sword;
+  }
+
+  function addSwordTween(scene, sword, angle, xOffset) {
+    scene.tweens.add({
+        targets: sword,
+        angle: angle, // Ângulo de rotação
+        x: sword.x + xOffset, // Movimento horizontal
+        duration: 500, // Duração da animação
+        ease: 'Linear', // Easing linear
+        repeat: -1, // Repete infinitamente
+        repeatDelay: 5000, // Atraso entre repetições
+        yoyo: true, // Alterna entre os valores inicial e final
+    });
+  }
+  
+  const swordX = textGameStatus.x + textGameStatus.width - 40;
+  const swordY = textGameStatus.y;
+
+  // Cria as espadas
+  const sword1 = createSword(scene, swordX, swordY);
+  const sword2 = createSword(scene, swordX + 10, swordY, true, 0.5);
+
+  addSwordTween(scene, sword1, -50, -10); // Espada 1: gira -50 graus e move para a esquerda
+  addSwordTween(scene, sword2, 50, 10); // Espada 2: gira 50 graus e move para a direita
+
+  // sword1.setAlpha(0);
+  // sword2.setAlpha(0);
+
+  // attacking
+  // receiving_attacking
+}
+
 // Função para criar objetos do jogo
 function createGameObjects() {
   const { width, height } = this.sys.game.config;
   const stars = this.add.group();
+  this.textCounts = this.add.group();
   this.cameras.main.setBackgroundColor("#000015");
 
+  // Cria o céu
   createSky(this);
   createClouds(this);
-
-  createTextLayout(this, width, height);
-
-  // Adiciona estrelas ao fundo
   createStars(this, stars, width, height);
-
-  // Adiciona estrelas cadentes
   createShootingStars(this, width, height);
+
+  // Cria texto
+  createTextLayout(this, width, height);
+  createGameStatusLayout(this, width, height);
 
   // Desenha círculos e linhas
   drawCirclesAndLines(this, width / 2, height);
@@ -177,7 +327,6 @@ function createGameObjects() {
 
   // Adiciona botão interativo
   const button = this.add.image(100, 760, "button").setInteractive().setScale(0.5);
-  button.on("pointerdown", () => handleCollision(this, 2, 150));
 
   // Posiciona naves
   placeShip(this, 1, 30, "red");
@@ -211,7 +360,7 @@ function createStar(scene, stars, width, height) {
 
 // Função para criar estrelas de fundo
 function createStars(scene, stars, width, height) {
-  for (let i = 0; i < 200; i++) {
+  for (let i = 0; i < 50; i++) {
     createStar(scene, stars, width, height); // Cria uma estrela
   }
 
@@ -344,6 +493,8 @@ function placeShip(scene, circle, angle, type) {
     point.type = type;
     point.alive = true;
   }
+
+  updateTexts(scene);
 }
 
 // Função para criar animações
@@ -410,6 +561,8 @@ function handleCollision(scene, circle, angle) {
       loop: true
     });
   }
+
+  updateTexts(scene);
 }
 
 // Função para encontrar pontos
