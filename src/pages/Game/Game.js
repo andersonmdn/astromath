@@ -40,11 +40,11 @@ const assets = {
     cloud_7: "/assets/kenney_background-elements/PNG/cloud7.png",
     cloud_8: "/assets/kenney_background-elements/PNG/cloud8.png",
     cloud_9: "/assets/kenney_background-elements/PNG/cloud9.png",
-    planning: "/assets/kenney_board-game-icons/PNG/Default (64px)/shield.png",
+    receiving_attacking: "/assets/kenney_board-game-icons/PNG/Default (64px)/shield.png",
     attacking: "/assets/kenney_board-game-icons/PNG/Default (64px)/sword.png",
-    receiving_attacking_1: "/assets/kenney_board-game-icons/PNG/Default (64px)/hourglass_top.png",
-    receiving_attacking_2: "/assets/kenney_board-game-icons/PNG/Default (64px)/hourglass.png",
-    receiving_attacking_3: "/assets/kenney_board-game-icons/PNG/Default (64px)/hourglass_bottom.png",
+    planning_1: "/assets/kenney_board-game-icons/PNG/Default (64px)/hourglass_top.png",
+    planning_2: "/assets/kenney_board-game-icons/PNG/Default (64px)/hourglass.png",
+    planning_3: "/assets/kenney_board-game-icons/PNG/Default (64px)/hourglass_bottom.png",
   },
   spritesheets: {
     explosion: {
@@ -197,7 +197,7 @@ function createClouds(scene) {
   }
 }
 
-function animateHourglass(scene, first, middle, end) {
+function animatePlanning(scene, first, middle, end) {
   // scene.time.delayedCall(5000, () => animateImages(images)); // Reinicia após 5 segundos
 
   scene.tweens.add({
@@ -238,6 +238,32 @@ function animateHourglass(scene, first, middle, end) {
   });
 }
 
+function animeteSword(scene, sword, angle, xOffset) {
+  scene.tweens.add({
+      targets: sword,
+      angle: angle, // Ângulo de rotação
+      x: sword.x + xOffset, // Movimento horizontal
+      duration: 500, // Duração da animação
+      ease: 'Linear', // Easing linear
+      repeat: -1, // Repete infinitamente
+      repeatDelay: 5000, // Atraso entre repetições
+      yoyo: true, // Alterna entre os valores inicial e final
+  });
+}
+
+function animeteReceivingAttacking(scene, planning) {
+  scene.tweens.add({
+      targets: planning,
+      angle: -10, // Ângulo de rotação
+      x: planning.x + 20, // Movimento horizontal
+      duration: 500, // Duração da animação
+      ease: 'Linear', // Easing linear
+      repeat: -1, // Repete infinitamente
+      repeatDelay: 5000, // Atraso entre repetições
+      yoyo: true, // Alterna entre os valores inicial e final
+  });
+}
+
 function createGameStatusLayout(scene, width, height) {
   const textGameStatus = scene.add.text(width / 2, 50, "Planejamento", {
     fontSize: "20px",
@@ -248,53 +274,32 @@ function createGameStatusLayout(scene, width, height) {
 
   console.log(textGameStatus);
 
-  const receivingAttacking1 = scene.add.image(textGameStatus.x - textGameStatus.width + 40, textGameStatus.y, "receiving_attacking_1").setScale(0.5).setOrigin(0.5, 0.5).setAlpha(0);
-  const receivingAttacking2 = scene.add.image(textGameStatus.x - textGameStatus.width + 40, textGameStatus.y, "receiving_attacking_2").setScale(0.5).setOrigin(0.5, 0.5).setAlpha(0);
-  const receivingAttacking3 = scene.add.image(textGameStatus.x - textGameStatus.width + 40, textGameStatus.y, "receiving_attacking_3").setScale(0.5).setOrigin(0.5, 0.5).setAlpha(0);
-  
-  animateHourglass(scene, receivingAttacking1, receivingAttacking2, receivingAttacking3);
-  
-  // scene.tweens.add({
-  //     targets: skull,
-  //     x: skull.x + Phaser.Math.Between(-2, 2), // Move 2 pixels para a direita
-  //     y: skull.y + Phaser.Math.Between(-2, 2), // Move 2 pixels para baixo
-  //     duration: 25, // Duração do movimento
-  //     yoyo: true, // Volta à posição original
-  //     repeat: -1, // Repete 5 vezes
-  //     repeatDelay: 1000, // Atraso entre repetições
-  // });
-
-  function createSword(scene, x, y, flipX = false, alpha = 1) {
-    const sword = scene.add.image(x, y, "attacking")
-        .setScale(0.5)
-        .setOrigin(0.5, 0.5)
-        .setFlipX(flipX)
-        .setAlpha(alpha);
-    return sword;
-  }
-
-  function addSwordTween(scene, sword, angle, xOffset) {
-    scene.tweens.add({
-        targets: sword,
-        angle: angle, // Ângulo de rotação
-        x: sword.x + xOffset, // Movimento horizontal
-        duration: 500, // Duração da animação
-        ease: 'Linear', // Easing linear
-        repeat: -1, // Repete infinitamente
-        repeatDelay: 5000, // Atraso entre repetições
-        yoyo: true, // Alterna entre os valores inicial e final
-    });
-  }
-  
   const swordX = textGameStatus.x + textGameStatus.width - 40;
   const swordY = textGameStatus.y;
+  
+  const receiving_attacking = scene.add.image(textGameStatus.x - textGameStatus.width, textGameStatus.y, "receiving_attacking").setScale(0.5).setOrigin(0.5, 0.5).setAlpha(1);
+  const sword3 = scene.add.image(textGameStatus.x - textGameStatus.width + 40, swordY, "attacking").setScale(0.5).setOrigin(0.5, 0.5).setFlipX(false).setAlpha(1).setRotation(60);
 
-  // Cria as espadas
-  const sword1 = createSword(scene, swordX, swordY);
-  const sword2 = createSword(scene, swordX + 10, swordY, true, 0.5);
+  sword3.setInteractive()
+  sword3.on("pointerdown", () => {
+    console.log(sword3);
+    sword3.angle += 10
+  });
 
-  addSwordTween(scene, sword1, -50, -10); // Espada 1: gira -50 graus e move para a esquerda
-  addSwordTween(scene, sword2, 50, 10); // Espada 2: gira 50 graus e move para a direita
+  animeteReceivingAttacking(scene, receiving_attacking);
+  //animeteSword(scene, sword3, -60, -10); // Espada 2: gira 50 graus e move para a direita
+
+  // const receivingAttacking1 = scene.add.image(textGameStatus.x - textGameStatus.width + 40, textGameStatus.y, "planning_1").setScale(0.5).setOrigin(0.5, 0.5).setAlpha(0);
+  // const receivingAttacking2 = scene.add.image(textGameStatus.x - textGameStatus.width + 40, textGameStatus.y, "planning_2").setScale(0.5).setOrigin(0.5, 0.5).setAlpha(0);
+  // const receivingAttacking3 = scene.add.image(textGameStatus.x - textGameStatus.width + 40, textGameStatus.y, "planning_3").setScale(0.5).setOrigin(0.5, 0.5).setAlpha(0);
+  
+  const sword1 = scene.add.image(swordX, swordY, "attacking").setScale(0.5).setOrigin(0.5, 0.5).setFlipX(false).setAlpha(1);
+  const sword2 = scene.add.image(swordX + 10, swordY, "attacking").setScale(0.5).setOrigin(0.5, 0.5).setFlipX(true).setAlpha(0.5);
+
+  //animatePlanning(scene, receivingAttacking1, receivingAttacking2, receivingAttacking3);
+  
+  animeteSword(scene, sword1, -50, 10); // Espada 1: gira -50 graus e move para a esquerda
+  animeteSword(scene, sword2, 50, 10); // Espada 2: gira 50 graus e move para a direita
 
   // sword1.setAlpha(0);
   // sword2.setAlpha(0);
