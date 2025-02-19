@@ -198,47 +198,54 @@ function createClouds(scene) {
 }
 
 function animatePlanning(scene, first, middle, end) {
-  // scene.time.delayedCall(5000, () => animateImages(images)); // Reinicia após 5 segundos
-
-  scene.tweens.add({
+  scene.statusTweenPlanningAnimation1 = scene.tweens.add({
     targets: first,
-    alpha: 100, // Fade out
+    alpha: 1, // Fade out
     duration: 1000, // Duração de 1 segundo
     delay: 0, // Espera 2 segundos antes de começar,
-    onComplete: () => {
-      first.setAlpha(0)
+    onAnimationEnd: () => {
+      first[0].setAlpha(0);
+      first[1].setAlpha(0);
     },
     repeat: -1,
     repeatDelay: 2000
   });
 
-  scene.tweens.add({
+  scene.statusTweenPlanningAnimation1.pause()
+
+  scene.statusTweenPlanningAnimation2 = scene.tweens.add({
     targets: middle,
     alpha: 100, // Fade out
     duration: 1000, // Duração de 1 segundo
     delay: 1000, // Espera 2 segundos antes de começar
-    onComplete: () => {
-      middle.setAlpha(0)
+    onAnimationEnd: () => {
+      middle[0].setAlpha(0);
+      middle[1].setAlpha(0);
     },
     repeat: -1,
     repeatDelay: 2000
   });
 
-  scene.tweens.add({
+  scene.statusTweenPlanningAnimation2.pause()
+
+  scene.statusTweenPlanningAnimation3 = scene.tweens.add({
     targets: end,
     alpha: 100, // Fade out
     duration: 1000, // Duração de 1 segundo
     delay: 2000, // Espera 2 segundos antes de começar
     angle: 180, // Gira 360 graus
-    onComplete: () => {
-      end.setAlpha(0)
+    onAnimationEnd: () => {
+      end[0].setAlpha(0);
+      end[1].setAlpha(0);
     },
     repeat: -1,
     repeatDelay: 2000
   });
+  
+  scene.statusTweenPlanningAnimation3.pause()
 }
 
-function animeteSword(scene, sword, angle, xOffset) {
+function animateSword(scene, sword, angle, xOffset) {
   scene.tweens.add({
       targets: sword,
       angle: angle, // Ângulo de rotação
@@ -251,11 +258,10 @@ function animeteSword(scene, sword, angle, xOffset) {
   });
 }
 
-function animeteReceivingAttacking(scene, planning) {
+function animateReceivingAttacking(scene, planning) {
   scene.tweens.add({
       targets: planning,
       angle: -10, // Ângulo de rotação
-      x: planning.x + 20, // Movimento horizontal
       duration: 500, // Duração da animação
       ease: 'Linear', // Easing linear
       repeat: -1, // Repete infinitamente
@@ -265,47 +271,73 @@ function animeteReceivingAttacking(scene, planning) {
 }
 
 function createGameStatusLayout(scene, width, height) {
-  const textGameStatus = scene.add.text(width / 2, 50, "Planejamento", {
+  const statusGameText = scene.add.text(width / 2, 50, "Planejamento", {
     fontSize: "20px",
     fontFamily: "Lexend",
     fill: "#FFB86C",
     align: "center",
   }).setOrigin(0.5, 0.5);
 
-  console.log(textGameStatus);
-
-  const swordX = textGameStatus.x + textGameStatus.width - 40;
-  const swordY = textGameStatus.y;
+  const statusReceiving_attacking = scene.add.image(statusGameText.x - statusGameText.width + 40, statusGameText.y, "receiving_attacking").setScale(0.5).setOrigin(0.5, 0.5).setAlpha(0);
   
-  const receiving_attacking = scene.add.image(textGameStatus.x - textGameStatus.width, textGameStatus.y, "receiving_attacking").setScale(0.5).setOrigin(0.5, 0.5).setAlpha(1);
-  const sword3 = scene.add.image(textGameStatus.x - textGameStatus.width + 40, swordY, "attacking").setScale(0.5).setOrigin(0.5, 0.5).setFlipX(false).setAlpha(1).setRotation(60);
+  const statusPlanning1 = scene.add.image(statusGameText.x - statusGameText.width + 40, statusGameText.y, "planning_1").setScale(0.5).setOrigin(0.5, 0.5).setAlpha(0);
+  const statusPlanning2 = scene.add.image(statusGameText.x - statusGameText.width + 40, statusGameText.y, "planning_2").setScale(0.5).setOrigin(0.5, 0.5).setAlpha(0);
+  const statusPlanning3 = scene.add.image(statusGameText.x - statusGameText.width + 40, statusGameText.y, "planning_3").setScale(0.5).setOrigin(0.5, 0.5).setAlpha(0);
 
-  sword3.setInteractive()
-  sword3.on("pointerdown", () => {
-    console.log(sword3);
-    sword3.angle += 10
-  });
-
-  animeteReceivingAttacking(scene, receiving_attacking);
-  //animeteSword(scene, sword3, -60, -10); // Espada 2: gira 50 graus e move para a direita
-
-  // const receivingAttacking1 = scene.add.image(textGameStatus.x - textGameStatus.width + 40, textGameStatus.y, "planning_1").setScale(0.5).setOrigin(0.5, 0.5).setAlpha(0);
-  // const receivingAttacking2 = scene.add.image(textGameStatus.x - textGameStatus.width + 40, textGameStatus.y, "planning_2").setScale(0.5).setOrigin(0.5, 0.5).setAlpha(0);
-  // const receivingAttacking3 = scene.add.image(textGameStatus.x - textGameStatus.width + 40, textGameStatus.y, "planning_3").setScale(0.5).setOrigin(0.5, 0.5).setAlpha(0);
+  const statusPlanning1Enemy = scene.add.image(statusGameText.x + statusGameText.width - 40, statusGameText.y, "planning_1").setScale(0.5).setOrigin(0.5, 0.5).setAlpha(0);
+  const statusPlanning2Enemy = scene.add.image(statusGameText.x + statusGameText.width - 40, statusGameText.y, "planning_2").setScale(0.5).setOrigin(0.5, 0.5).setAlpha(0);
+  const statusPlanning3Enemy = scene.add.image(statusGameText.x + statusGameText.width - 40, statusGameText.y, "planning_3").setScale(0.5).setOrigin(0.5, 0.5).setAlpha(0);
   
-  const sword1 = scene.add.image(swordX, swordY, "attacking").setScale(0.5).setOrigin(0.5, 0.5).setFlipX(false).setAlpha(1);
-  const sword2 = scene.add.image(swordX + 10, swordY, "attacking").setScale(0.5).setOrigin(0.5, 0.5).setFlipX(true).setAlpha(0.5);
+  const statusAttacking1 = scene.add.image(statusGameText.x + statusGameText.width - 40, statusGameText.y, "attacking").setScale(0.5).setOrigin(0.5, 0.5).setFlipX(false).setAlpha(0);
+  const statusAttacking2 = scene.add.image(statusGameText.x + statusGameText.width - 40 + 10, statusGameText.y, "attacking").setScale(0.5).setOrigin(0.5, 0.5).setFlipX(true).setAlpha(0);
 
-  //animatePlanning(scene, receivingAttacking1, receivingAttacking2, receivingAttacking3);
+  animateReceivingAttacking(scene, statusReceiving_attacking);
+  animatePlanning(scene, [statusPlanning1, statusPlanning1Enemy], [statusPlanning2, statusPlanning2Enemy], [statusPlanning3, statusPlanning3Enemy]);
+  animateSword(scene, statusAttacking1, -50, -10);
+  animateSword(scene, statusAttacking2, 50, 10);
+
+  scene.statusGameText = statusGameText;
+  scene.statusReceiving_attacking = statusReceiving_attacking;
+  scene.statusPlanning1 = statusPlanning1;
+  scene.statusPlanning2 = statusPlanning2;
+  scene.statusPlanning3 = statusPlanning3;
+  scene.statusPlanning1Enemy = statusPlanning1Enemy;
+  scene.statusPlanning2Enemy = statusPlanning2Enemy;
+  scene.statusPlanning3Enemy = statusPlanning3Enemy;
+  scene.statusAttacking1 = statusAttacking1;
+  scene.statusAttacking2 = statusAttacking2;
+}
+
+function updateStatus(scene, status) {
+  scene.statusPlanning1.setAlpha(0)
+  scene.statusPlanning2.setAlpha(0)
+  scene.statusPlanning3.setAlpha(0)
+  scene.statusPlanning1Enemy.setAlpha(0)
+  scene.statusPlanning2Enemy.setAlpha(0)
+  scene.statusPlanning3Enemy.setAlpha(0)
+  scene.statusTweenPlanningAnimation1.pause()
+  scene.statusTweenPlanningAnimation2.pause()
+  scene.statusTweenPlanningAnimation3.pause()
+
+  if (status === 0) {
+    scene.statusPlanning1.setAlpha(1)
+    scene.statusTweenPlanningAnimation1.play()
+    scene.statusTweenPlanningAnimation2.play()
+    scene.statusTweenPlanningAnimation3.play()
+    scene.statusPlanning1Enemy.setAlpha(1)
+    scene.statusTweenPlanningAnimation1.play()
+    scene.statusTweenPlanningAnimation2.play()
+    scene.statusTweenPlanningAnimation3.play()
+    scene.statusGameText.setText("Planejamento");
+  } else if (status === 1) {
+    scene.statusAttacking1.setAlpha(1)
+    scene.statusAttacking2.setAlpha(1)
+    scene.statusReceiving_attacking.setAlpha(1)
+    scene.statusGameText.setText("Ataque");
+  } else {
+    scene.statusGameText.setText("Defesa");
+  }
   
-  animeteSword(scene, sword1, -50, 10); // Espada 1: gira -50 graus e move para a esquerda
-  animeteSword(scene, sword2, 50, 10); // Espada 2: gira 50 graus e move para a direita
-
-  // sword1.setAlpha(0);
-  // sword2.setAlpha(0);
-
-  // attacking
-  // receiving_attacking
 }
 
 // Função para criar objetos do jogo
@@ -332,6 +364,15 @@ function createGameObjects() {
 
   // Adiciona botão interativo
   const button = this.add.image(100, 760, "button").setInteractive().setScale(0.5);
+  const button2 = this.add.image(500, 760, "button").setInteractive().setScale(0.5);
+
+  button.on("pointerdown", () => {
+    updateStatus(this, 0);
+  });
+
+  button2.on("pointerdown", () => {
+    updateStatus(this, 1);
+  });
 
   // Posiciona naves
   placeShip(this, 1, 30, "red");
