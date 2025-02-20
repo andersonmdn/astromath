@@ -215,7 +215,7 @@ function animatePlanning(scene, first, middle, end) {
 
   scene.statusTweenPlanningAnimation2 = scene.tweens.add({
     targets: middle,
-    alpha: 100, // Fade out
+    alpha: 1, // Fade out
     duration: 1000, // Duração de 1 segundo
     delay: 1000, // Espera 2 segundos antes de começar
     onAnimationEnd: () => {
@@ -230,7 +230,7 @@ function animatePlanning(scene, first, middle, end) {
 
   scene.statusTweenPlanningAnimation3 = scene.tweens.add({
     targets: end,
-    alpha: 100, // Fade out
+    alpha: 1, // Fade out
     duration: 1000, // Duração de 1 segundo
     delay: 2000, // Espera 2 segundos antes de começar
     angle: 180, // Gira 360 graus
@@ -249,7 +249,7 @@ function animateSword(scene, sword, angle, xOffset) {
   scene.tweens.add({
       targets: sword,
       angle: angle, // Ângulo de rotação
-      x: sword.x + xOffset, // Movimento horizontal
+      x: `+=${xOffset}`, // Movimento horizontal
       duration: 500, // Duração da animação
       ease: 'Linear', // Easing linear
       repeat: -1, // Repete infinitamente
@@ -261,7 +261,7 @@ function animateSword(scene, sword, angle, xOffset) {
 function animateReceivingAttacking(scene, planning) {
   scene.tweens.add({
       targets: planning,
-      angle: -10, // Ângulo de rotação
+      scale: 0.6, // Escala
       duration: 500, // Duração da animação
       ease: 'Linear', // Easing linear
       repeat: -1, // Repete infinitamente
@@ -278,7 +278,8 @@ function createGameStatusLayout(scene, width, height) {
     align: "center",
   }).setOrigin(0.5, 0.5);
 
-  const statusReceiving_attacking = scene.add.image(statusGameText.x - statusGameText.width + 40, statusGameText.y, "receiving_attacking").setScale(0.5).setOrigin(0.5, 0.5).setAlpha(0);
+  const statusReceivingAttacking1 = scene.add.image(statusGameText.x - statusGameText.width + 40, statusGameText.y, "receiving_attacking").setScale(0.5).setOrigin(0.5, 0.5).setAlpha(0);
+  const statusReceivingAttacking2 = scene.add.image(statusGameText.x + statusGameText.width - 40, statusGameText.y, "receiving_attacking").setScale(0.5).setOrigin(0.5, 0.5).setAlpha(0);
   
   const statusPlanning1 = scene.add.image(statusGameText.x - statusGameText.width + 40, statusGameText.y, "planning_1").setScale(0.5).setOrigin(0.5, 0.5).setAlpha(0);
   const statusPlanning2 = scene.add.image(statusGameText.x - statusGameText.width + 40, statusGameText.y, "planning_2").setScale(0.5).setOrigin(0.5, 0.5).setAlpha(0);
@@ -290,14 +291,17 @@ function createGameStatusLayout(scene, width, height) {
   
   const statusAttacking1 = scene.add.image(statusGameText.x + statusGameText.width - 40, statusGameText.y, "attacking").setScale(0.5).setOrigin(0.5, 0.5).setFlipX(false).setAlpha(0);
   const statusAttacking2 = scene.add.image(statusGameText.x + statusGameText.width - 40 + 10, statusGameText.y, "attacking").setScale(0.5).setOrigin(0.5, 0.5).setFlipX(true).setAlpha(0);
+  const statusAttacking3 = scene.add.image(statusGameText.x - statusGameText.width + 40, statusGameText.y, "attacking").setScale(0.5).setOrigin(0.5, 0.5).setFlipX(false).setAlpha(0);
+  const statusAttacking4 = scene.add.image(statusGameText.x - statusGameText.width + 40 + 10, statusGameText.y, "attacking").setScale(0.5).setOrigin(0.5, 0.5).setFlipX(true).setAlpha(0);
 
-  animateReceivingAttacking(scene, statusReceiving_attacking);
+  animateReceivingAttacking(scene, [statusReceivingAttacking1, statusReceivingAttacking2]);
   animatePlanning(scene, [statusPlanning1, statusPlanning1Enemy], [statusPlanning2, statusPlanning2Enemy], [statusPlanning3, statusPlanning3Enemy]);
-  animateSword(scene, statusAttacking1, -50, -10);
-  animateSword(scene, statusAttacking2, 50, 10);
+  animateSword(scene, [statusAttacking1, statusAttacking3], -50, -10);
+  animateSword(scene, [statusAttacking2, statusAttacking4], 50, 10);
 
   scene.statusGameText = statusGameText;
-  scene.statusReceiving_attacking = statusReceiving_attacking;
+  scene.statusReceivingAttacking1 = statusReceivingAttacking1;
+  scene.statusReceivingAttacking2 = statusReceivingAttacking2;
   scene.statusPlanning1 = statusPlanning1;
   scene.statusPlanning2 = statusPlanning2;
   scene.statusPlanning3 = statusPlanning3;
@@ -306,36 +310,50 @@ function createGameStatusLayout(scene, width, height) {
   scene.statusPlanning3Enemy = statusPlanning3Enemy;
   scene.statusAttacking1 = statusAttacking1;
   scene.statusAttacking2 = statusAttacking2;
+  scene.statusAttacking3 = statusAttacking3;
+  scene.statusAttacking4 = statusAttacking4;
 }
 
 function updateStatus(scene, status) {
+  scene.statusTweenPlanningAnimation1.restart()
+  scene.statusTweenPlanningAnimation2.restart()
+  scene.statusTweenPlanningAnimation3.restart()
+  scene.statusTweenPlanningAnimation1.pause()
+  scene.statusTweenPlanningAnimation2.pause()
+  scene.statusTweenPlanningAnimation3.pause()
   scene.statusPlanning1.setAlpha(0)
   scene.statusPlanning2.setAlpha(0)
   scene.statusPlanning3.setAlpha(0)
   scene.statusPlanning1Enemy.setAlpha(0)
   scene.statusPlanning2Enemy.setAlpha(0)
   scene.statusPlanning3Enemy.setAlpha(0)
-  scene.statusTweenPlanningAnimation1.pause()
-  scene.statusTweenPlanningAnimation2.pause()
-  scene.statusTweenPlanningAnimation3.pause()
-
+  scene.statusAttacking1.setAlpha(0)
+  scene.statusAttacking2.setAlpha(0)
+  scene.statusAttacking3.setAlpha(0)
+  scene.statusAttacking4.setAlpha(0)
+  scene.statusReceivingAttacking1.setAlpha(0)
+  scene.statusReceivingAttacking2.setAlpha(0)
+  
   if (status === 0) {
     scene.statusPlanning1.setAlpha(1)
     scene.statusTweenPlanningAnimation1.play()
     scene.statusTweenPlanningAnimation2.play()
     scene.statusTweenPlanningAnimation3.play()
     scene.statusPlanning1Enemy.setAlpha(1)
-    scene.statusTweenPlanningAnimation1.play()
-    scene.statusTweenPlanningAnimation2.play()
-    scene.statusTweenPlanningAnimation3.play()
     scene.statusGameText.setText("Planejamento");
+    scene.statusGameText.setColor("#FFB86C");
   } else if (status === 1) {
     scene.statusAttacking1.setAlpha(1)
-    scene.statusAttacking2.setAlpha(1)
-    scene.statusReceiving_attacking.setAlpha(1)
+    scene.statusAttacking2.setAlpha(0.5)
+    scene.statusAttacking3.setAlpha(1)
+    scene.statusAttacking4.setAlpha(0.5)
     scene.statusGameText.setText("Ataque");
+    scene.statusGameText.setColor("#FF5555");
   } else {
+    scene.statusReceivingAttacking1.setAlpha(1)
+    scene.statusReceivingAttacking2.setAlpha(1)
     scene.statusGameText.setText("Defesa");
+    scene.statusGameText.setColor("#50FA7B");
   }
   
 }
@@ -365,6 +383,7 @@ function createGameObjects() {
   // Adiciona botão interativo
   const button = this.add.image(100, 760, "button").setInteractive().setScale(0.5);
   const button2 = this.add.image(500, 760, "button").setInteractive().setScale(0.5);
+  const button3 = this.add.image(800, 760, "button").setInteractive().setScale(0.5);
 
   button.on("pointerdown", () => {
     updateStatus(this, 0);
@@ -372,6 +391,10 @@ function createGameObjects() {
 
   button2.on("pointerdown", () => {
     updateStatus(this, 1);
+  });
+
+  button3.on("pointerdown", () => {
+    updateStatus(this, 2);
   });
 
   // Posiciona naves
@@ -421,7 +444,7 @@ function createStars(scene, stars, width, height) {
 }
 
 // Função para destruir e criar novas estrelas
-function destroyAndCreateStars(scene, stars, width, height) {
+function destroyAndCreateStars(scene, stars) {
   // Destrói algumas estrelas aleatoriamente
   const starsToDestroy = Phaser.Math.Between(10, 30); // Número de estrelas a destruir
   for (let i = 0; i < starsToDestroy; i++) {
