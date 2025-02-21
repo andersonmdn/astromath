@@ -105,19 +105,19 @@ function createTextLayout(scene, width, height) {
   const blueCount = countTypes("blue");
   const greenCount = countTypes("green");
 
-  scene.add.image(((width / 2) / 5) * 1, 60, "ship_red").setScale(0.5).setOrigin(0.5, 0.5);
+  const redImage = scene.add.image(((width / 2) / 5) * 1, 60, "ship_red").setScale(0.5).setOrigin(0.5, 0.5);
   const redCountText = scene.add.text(((width / 2) / 5) * 1, 100, `x ${redCount}`, fontConfigCounter).setOrigin(0.5, 0.5);
   redCountText.nome = "red";
 
-  scene.add.image(((width / 2) / 5) * 2, 60, "ship_black").setScale(0.5).setOrigin(0.5, 0.5);
+  const blackImage = scene.add.image(((width / 2) / 5) * 2, 60, "ship_black").setScale(0.5).setOrigin(0.5, 0.5);
   const blackCountText = scene.add.text(((width / 2) / 5) * 2, 100, `x ${blackCount}`, fontConfigCounter).setOrigin(0.5, 0.5);
   blackCountText.nome = "black";
 
-  scene.add.image(((width / 2) / 5) * 3, 60, "ship_green").setScale(0.5).setOrigin(0.5, 0.5);
+  const greenImage = scene.add.image(((width / 2) / 5) * 3, 60, "ship_green").setScale(0.5).setOrigin(0.5, 0.5);
   const greenCountText = scene.add.text(((width / 2) / 5) * 3, 100, `x ${greenCount}`, fontConfigCounter).setOrigin(0.5, 0.5);
   greenCountText.nome = "green";
 
-  scene.add.image(((width / 2) / 5) * 4, 60, "ship_blue").setScale(0.5).setOrigin(0.5, 0.5);
+  const blueImage = scene.add.image(((width / 2) / 5) * 4, 60, "ship_blue").setScale(0.5).setOrigin(0.5, 0.5);
   const blueCountText = scene.add.text(((width / 2) / 5) * 4, 100, `x ${blueCount}`, fontConfigCounter).setOrigin(0.5, 0.5);
   blueCountText.nome = "blue";
 
@@ -125,6 +125,10 @@ function createTextLayout(scene, width, height) {
   scene.textCounts.add(blackCountText);
   scene.textCounts.add(greenCountText);
   scene.textCounts.add(blueCountText);
+  scene.textCounts.add(redImage);
+  scene.textCounts.add(blackImage);
+  scene.textCounts.add(greenImage);
+  scene.textCounts.add(blueImage);
 }
 
 function updateTexts(scene) {
@@ -137,7 +141,9 @@ function updateTexts(scene) {
 
   const textsCounts = scene.textCounts.getChildren();
 
-  textsCounts.forEach((text) => {
+  textsCounts.forEach((text, index) => {
+    if (index >= 4) return;
+
     if (text.nome.includes("red")) {
       text.setText(`x ${newRedCount}`);
     } else if (text.nome.includes("black")) {
@@ -335,6 +341,8 @@ function updateStatus(scene, status) {
   scene.statusReceivingAttacking2.setAlpha(0)
   
   if (status === 0) {
+    scene.textCounts.setAlpha(0)
+    scene.gameStatus = 0;
     scene.statusPlanning1.setAlpha(1)
     scene.statusTweenPlanningAnimation1.play()
     scene.statusTweenPlanningAnimation2.play()
@@ -343,6 +351,8 @@ function updateStatus(scene, status) {
     scene.statusGameText.setText("Planejamento");
     scene.statusGameText.setColor("#FFB86C");
   } else if (status === 1) {
+    scene.textCounts.setAlpha(1)
+    scene.gameStatus = 1;
     scene.statusAttacking1.setAlpha(1)
     scene.statusAttacking2.setAlpha(0.5)
     scene.statusAttacking3.setAlpha(1)
@@ -350,12 +360,15 @@ function updateStatus(scene, status) {
     scene.statusGameText.setText("Ataque");
     scene.statusGameText.setColor("#FF5555");
   } else {
+    scene.textCounts.setAlpha(1)
+    scene.gameStatus = 2;
     scene.statusReceivingAttacking1.setAlpha(1)
     scene.statusReceivingAttacking2.setAlpha(1)
     scene.statusGameText.setText("Defesa");
     scene.statusGameText.setColor("#50FA7B");
   }
-  
+
+  controlGameFlow(scene);
 }
 
 // Função para criar objetos do jogo
@@ -363,6 +376,7 @@ function createGameObjects() {
   const { width, height } = this.sys.game.config;
   const stars = this.add.group();
   this.textCounts = this.add.group();
+  this.positionableShips = this.add.group();
   this.cameras.main.setBackgroundColor("#000015");
 
   // Cria o céu
@@ -397,12 +411,12 @@ function createGameObjects() {
     updateStatus(this, 2);
   });
 
-  // Posiciona naves
-  placeShip(this, 1, 30, "red");
-  placeShip(this, 3, 60, "black");
-  placeShip(this, 1, 120, "green");
-  placeShip(this, 2, 270, "blue");
-  placeShip(this, 3, 330, "red");
+  // // Posiciona naves
+  // placeShip(this, 1, 30, "red");
+  // placeShip(this, 3, 60, "black");
+  // placeShip(this, 1, 120, "green");
+  // placeShip(this, 2, 270, "blue");
+  // placeShip(this, 3, 330, "red");
 
   // Cria animações
   createAnimations(this);
@@ -546,7 +560,7 @@ function drawCirclesAndLines(scene, width, height) {
       }
 
       const pointObject = scene.add.zone(x, y, 45, 45).setInteractive();
-      pointObject.on("pointerdown", () => handleCollision(scene, index + 1, angle));
+      pointObject.on("pointerdown", () => pointClick(scene, index + 1, angle));
     }
   });
 }
@@ -564,6 +578,62 @@ function placeShip(scene, circle, angle, type) {
   }
 
   updateTexts(scene);
+
+  console.log(points);
+}
+
+function rulesSpaceship(scene, circle, angle, type) {
+  const pointsInCircle = points.filter(p => p.circle === circle);
+  
+  const previousIndex = (pointsInCircle.findIndex(p => p.angle === angle) - 1 + pointsInCircle.length) % pointsInCircle.length;
+  const nextIndex = (pointsInCircle.findIndex(p => p.angle === angle) + 1) % pointsInCircle.length;
+
+  const previousPoint = points[previousIndex];
+  const nextPoint = points[nextIndex];
+
+  if ((type === "black" && previousPoint.type === "black" || nextPoint.type === "black") || (type === "black" && previousPoint.type === "" && nextPoint.type === "")) {
+      return true;
+  }
+
+  if ((type === "red" && previousPoint.type === "red" || nextPoint.type === "red") || (type === "red" && previousPoint.type === "" && nextPoint.type === "")) {
+      return true;
+  }
+
+  if ((type === "green" && previousPoint.type === "green" || nextPoint.type === "green") || (type === "green" && previousPoint.type === "" && nextPoint.type === "")) {
+      return true;
+  }
+
+  if (type === "blue" && previousPoint.type === "" && nextPoint.type === "") {
+      return true;
+  }
+
+  return false;
+}
+
+function controlGameFlow(scene) {
+  const { width, height } = scene.sys.game.config;
+
+  const countTypes = (type) => points.filter(point => point.type === type).length;
+
+  const redCount = countTypes("red");
+  const blackCount = countTypes("black");
+  const blueCount = countTypes("blue");
+  const greenCount = countTypes("green");
+
+  if (scene.gameStatus === 0) {
+    if (blueCount < 5) {
+      const shipPositions = [-2, -1, 0, 1, 2];
+
+      shipPositions.forEach((pos, index) => {
+        if (index >= blueCount) {
+          const imageSpaceShip = scene.add.image((width / 2) + pos * 50, 100, "ship_blue").setScale(0.5).setOrigin(0.5, 0.5)
+          imageSpaceShip.type = "blue";
+
+          scene.positionableShips.add(imageSpaceShip);
+        }
+      });
+    }
+  }
 }
 
 // Função para criar animações
@@ -598,41 +668,63 @@ function createTweenLaser(scene, startX, startY, targetX, targetY) {
 }
 
 // Função para lidar com colisões
-function handleCollision(scene, circle, angle) {
+function pointClick(scene, circle, angle) {
   const point = findPoint(circle, angle);
-  if (point && point.ship) {
-    if (point.alive) {
-      const explosion = scene.add.sprite(point.x, point.y, "explosion");
-      explosion.play("explode").on("animationcomplete", () => explosion.destroy());
-      const fire = scene.add.sprite(point.x, point.y, "fire").play("burning").setScale(1.5);
+  if (scene.gameStatus === 0) {
+    const currentShip = scene.positionableShips.getFirstAlive();
 
-      point.alive = false;
-    }
-    
-    const randomX = Phaser.Math.Between(0, scene.scale.width);
-    scene.sound.play("laser2");
-    createTweenLaser(scene, randomX, -100, point.x, point.y);
-  } else {
-    if (point && point.occupied) return;
-
-    let meteor = scene.add.image(point.x, point.y, "meteor").setScale(0.5);
-
-    let rotationSpeed = 0.005;
-    
-    point.occupied = true;
-    point.type = "meteor";
-
-    scene.time.addEvent({
-      delay: 1000 / 60, // 60fps
-      callback: () => {
-        meteor.rotation += rotationSpeed;
-      },
-      loop: true
+    scene.tweens.add({
+      targets: currentShip,
+      x: point.x,
+      y: point.y,
+      duration: 400,
+      ease: "Linear",
+      onComplete: () => {
+        currentShip.destroy();
+        placeShip(scene, circle, angle, currentShip.type);
+      }
     });
+
+    
+  } else {
+    if (point && point.ship) {
+      if (point.alive) {
+        const explosion = scene.add.sprite(point.x, point.y, "explosion");
+        explosion.play("explode").on("animationcomplete", () => explosion.destroy());
+        const fire = scene.add.sprite(point.x, point.y, "fire").play("burning").setScale(1.5);
+
+        point.alive = false;
+      }
+      
+      const randomX = Phaser.Math.Between(0, scene.scale.width);
+      scene.sound.play("laser2");
+      createTweenLaser(scene, randomX, -100, point.x, point.y);
+    } else {
+      placeMeteor(scene, point);
+    }
   }
 
   updateTexts(scene);
 }
+
+function placeMeteor(scene, point) {
+  if (point && point.occupied) return;
+
+  let meteor = scene.add.image(point.x, point.y, "meteor").setScale(0.5);
+
+  let rotationSpeed = 0.005;
+  
+  point.occupied = true;
+  point.type = "meteor";
+
+  scene.time.addEvent({
+    delay: 1000 / 60, // 60fps
+    callback: () => {
+      meteor.rotation += rotationSpeed;
+    },
+    loop: true
+  });
+}	
 
 // Função para encontrar pontos
 function findPoint(circle, angle) {
