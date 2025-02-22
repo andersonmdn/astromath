@@ -14,6 +14,19 @@ const gameConfig = {
   },
 };
 
+const fontConfig = {
+  fontSize: "20px",
+  fontFamily: "Lexend",
+  fill: "#50FA7B",
+  align: "center",
+};
+
+const GAME_STATUS = {
+  PLANNING: 0,
+  ATTACK: 1,
+  DEFENSE: 2,
+};
+
 const points = [];
 
 // Assets do jogo
@@ -61,64 +74,64 @@ const assets = {
   },
 };
 
+function loadAssets(scene, assets) {
+  Object.entries(assets.images).forEach(([key, path]) => scene.load.image(key, path));
+  Object.entries(assets.spritesheets).forEach(([key, { path, frameConfig }]) => scene.load.spritesheet(key, path, frameConfig));
+  Object.entries(assets.audio).forEach(([key, path]) => scene.load.audio(key, path));
+}
+
+function countShips(type) {
+  return points.filter(point => point.type === type && point.alive).length;
+}
+
+function canPlaceShip(scene) {
+  return scene.gameStatus === GAME_STATUS.PLANNING;
+}
+
+function createTweens(scene, config) {
+  return scene.tweens.add({
+    targets: config.targets,
+    alpha: config.alpha ?? 1,
+    angle: config.angle ?? 0,
+    x: config.x ?? null,
+    duration: config.duration ?? 500,
+    repeat: config.repeat ?? -1,
+    yoyo: config.yoyo ?? true,
+    repeatDelay: config.repeatDelay ?? 5000,
+    ease: "Linear",
+  });
+}
+
 // Função para carregar assets
 function preloadAssets() {
-  const { images, spritesheets, audio } = assets;
   this.load.setCORS("anonymous");
 
-  // Carrega imagens
-  Object.entries(images).forEach(([key, path]) => {
-    this.load.image(key, path);
-  });
-
-  // Carrega spritesheets
-  Object.entries(spritesheets).forEach(([key, { path, frameConfig }]) => {
-    this.load.spritesheet(key, path, frameConfig);
-  });
-
-  // Carrega áudios
-  Object.entries(audio).forEach(([key, path]) => {
-    this.load.audio(key, path);
-  });
+  loadAssets(this, assets);
 }
 
 // Função para criar texto
 function createTextLayout(scene, width, height) {
-  scene.add.text((width / 2) / 2, 20, `Player 1 - Naves Restantes`, {
-    fontSize: "20px",
-    fontFamily: "Lexend",
-    fill: "#50FA7B",
-    align: "center",
-  }).setOrigin(0.5, 0.5);
+  scene.add.text((width / 2) / 2, 20, `Player 1 - Naves Restantes`, fontConfig).setOrigin(0.5, 0.5);
 
-  const fontConfigCounter = {
-    fontSize: "20px",
-    fontFamily: "Lexend",
-    fill: "#50FA7B",
-    align: "center",
-  }
-
-  const countTypes = (type) => points.filter(point => point.type === type).length;
-
-  const redCount = countTypes("red");
-  const blackCount = countTypes("black");
-  const blueCount = countTypes("blue");
-  const greenCount = countTypes("green");
+  const redCount = countShips("red");
+  const blackCount = countShips("black");
+  const blueCount = countShips("blue");
+  const greenCount = countShips("green");
 
   const redImage = scene.add.image(((width / 2) / 5) * 1, 60, "ship_red").setScale(0.5).setOrigin(0.5, 0.5);
-  const redCountText = scene.add.text(((width / 2) / 5) * 1, 100, `x ${redCount}`, fontConfigCounter).setOrigin(0.5, 0.5);
+  const redCountText = scene.add.text(((width / 2) / 5) * 1, 100, `x ${redCount}`, fontConfig).setOrigin(0.5, 0.5);
   redCountText.nome = "red";
 
   const blackImage = scene.add.image(((width / 2) / 5) * 2, 60, "ship_black").setScale(0.5).setOrigin(0.5, 0.5);
-  const blackCountText = scene.add.text(((width / 2) / 5) * 2, 100, `x ${blackCount}`, fontConfigCounter).setOrigin(0.5, 0.5);
+  const blackCountText = scene.add.text(((width / 2) / 5) * 2, 100, `x ${blackCount}`, fontConfig).setOrigin(0.5, 0.5);
   blackCountText.nome = "black";
 
   const greenImage = scene.add.image(((width / 2) / 5) * 3, 60, "ship_green").setScale(0.5).setOrigin(0.5, 0.5);
-  const greenCountText = scene.add.text(((width / 2) / 5) * 3, 100, `x ${greenCount}`, fontConfigCounter).setOrigin(0.5, 0.5);
+  const greenCountText = scene.add.text(((width / 2) / 5) * 3, 100, `x ${greenCount}`, fontConfig).setOrigin(0.5, 0.5);
   greenCountText.nome = "green";
 
   const blueImage = scene.add.image(((width / 2) / 5) * 4, 60, "ship_blue").setScale(0.5).setOrigin(0.5, 0.5);
-  const blueCountText = scene.add.text(((width / 2) / 5) * 4, 100, `x ${blueCount}`, fontConfigCounter).setOrigin(0.5, 0.5);
+  const blueCountText = scene.add.text(((width / 2) / 5) * 4, 100, `x ${blueCount}`, fontConfig).setOrigin(0.5, 0.5);
   blueCountText.nome = "blue";
 
   scene.textCounts.add(redCountText);
@@ -132,12 +145,10 @@ function createTextLayout(scene, width, height) {
 }
 
 function updateTexts(scene) {
-  const countTypes = (type) => points.filter(point => point.type === type && point.alive).length;
-
-  const newRedCount = countTypes("red");
-  const newBlackCount = countTypes("black");
-  const newBlueCount = countTypes("blue");
-  const newGreenCount = countTypes("green");
+  const newRedCount = countShips("red");
+  const newBlackCount = countShips("black");
+  const newBlueCount = countShips("blue");
+  const newGreenCount = countShips("green");
 
   const textsCounts = scene.textCounts.getChildren();
 
@@ -191,15 +202,7 @@ function createClouds(scene) {
     clouds.add(cloud);
 
     // Movimento da nuvem
-    scene.tweens.add({
-      targets: cloud,
-      x: width + cloud.width, // Move a nuvem para a direita
-      duration: Phaser.Math.Between(10000, 20000), // Duração aleatória
-      ease: 'Linear',
-      repeat: -1, // Repete infinitamente
-      yoyo: false,
-      delay: Phaser.Math.Between(0, 5000) // Delay aleatório
-    });
+    createTweens(scene, { targets: cloud, x: `+=${width}`, duration: Phaser.Math.Between(10000, 20000), yoyo: false, delay: Phaser.Math.Between(0, 5000), repeat: -1 });
   }
 }
 
@@ -277,12 +280,7 @@ function animateReceivingAttacking(scene, planning) {
 }
 
 function createGameStatusLayout(scene, width, height) {
-  const statusGameText = scene.add.text(width / 2, 50, "Planejamento", {
-    fontSize: "20px",
-    fontFamily: "Lexend",
-    fill: "#FFB86C",
-    align: "center",
-  }).setOrigin(0.5, 0.5);
+  const statusGameText = scene.add.text(width / 2, 50, "Planejamento", fontConfig).setOrigin(0.5, 0.5);
 
   const statusReceivingAttacking1 = scene.add.image(statusGameText.x - statusGameText.width + 40, statusGameText.y, "receiving_attacking").setScale(0.5).setOrigin(0.5, 0.5).setAlpha(0);
   const statusReceivingAttacking2 = scene.add.image(statusGameText.x + statusGameText.width - 40, statusGameText.y, "receiving_attacking").setScale(0.5).setOrigin(0.5, 0.5).setAlpha(0);
@@ -342,7 +340,7 @@ function updateStatus(scene, status) {
   
   if (status === 0) {
     scene.textCounts.setAlpha(0)
-    scene.gameStatus = 0;
+    scene.gameStatus = GAME_STATUS.PLANNING;
     scene.statusPlanning1.setAlpha(1)
     scene.statusTweenPlanningAnimation1.play()
     scene.statusTweenPlanningAnimation2.play()
@@ -352,7 +350,7 @@ function updateStatus(scene, status) {
     scene.statusGameText.setColor("#FFB86C");
   } else if (status === 1) {
     scene.textCounts.setAlpha(1)
-    scene.gameStatus = 1;
+    scene.gameStatus = GAME_STATUS.ATTACK;
     scene.statusAttacking1.setAlpha(1)
     scene.statusAttacking2.setAlpha(0.5)
     scene.statusAttacking3.setAlpha(1)
@@ -361,7 +359,7 @@ function updateStatus(scene, status) {
     scene.statusGameText.setColor("#FF5555");
   } else {
     scene.textCounts.setAlpha(1)
-    scene.gameStatus = 2;
+    scene.gameStatus = GAME_STATUS.DEFENSE;
     scene.statusReceivingAttacking1.setAlpha(1)
     scene.statusReceivingAttacking2.setAlpha(1)
     scene.statusGameText.setText("Defesa");
@@ -616,16 +614,14 @@ function rulesSpaceship(scene, circle, angle, type) {
 function updateGameFlow(scene) {
   const { width, height } = scene.sys.game.config;
 
-  const countTypes = (type) => points.filter(point => point.type === type).length;
-
-  const redCount = countTypes("red");
-  const blackCount = countTypes("black");
-  const blueCount = countTypes("blue");
-  const greenCount = countTypes("green");
+  const redCount = countShips("red");
+  const blackCount = countShips("black");
+  const blueCount = countShips("blue");
+  const greenCount = countShips("green");
   
   console.log("Blue Count ", blueCount);
 
-  if (scene.gameStatus === 0) {
+  if (canPlaceShip(scene)) {
     if (blueCount == 0 && scene.positionableShips.getLength() === 0) {
       const shipPositions = [-2, -1, 0, 1, 2];
 
@@ -682,46 +678,58 @@ function createTweenLaser(scene, startX, startY, targetX, targetY) {
 });
 }
 
+function placeShipIfPossible(scene, circle, angle) {
+  const point = findPoint(circle, angle);
+
+  const currentShip = scene.positionableShips.getFirstAlive();
+    
+  if (!currentShip || point.occupied) return;
+
+  scene.positionableShips.remove(currentShip, false, false);
+
+  scene.tweens.add({
+    targets: currentShip,
+    x: point.x,
+    y: point.y,
+    duration: 400,
+    ease: "Linear",
+    onComplete: () => {
+      currentShip.destroy();
+      if (placeShip(scene, circle, angle, currentShip.type)) {
+        updateTexts(scene);
+        updateGameFlow(scene);
+      }
+    }
+  });
+}
+
+function handleAttackOrDefense(scene, circle, angle) {
+  const point = findPoint(circle, angle);
+
+  if (point && point.ship) {
+    if (point.alive) {
+      const explosion = scene.add.sprite(point.x, point.y, "explosion");
+      explosion.play("explode").on("animationcomplete", () => explosion.destroy());
+      const fire = scene.add.sprite(point.x, point.y, "fire").play("burning").setScale(1.5);
+
+      point.alive = false;
+    }
+    
+    const randomX = Phaser.Math.Between(0, scene.scale.width);
+    scene.sound.play("laser2");
+    createTweenLaser(scene, randomX, -100, point.x, point.y);
+  } else {
+    placeMeteor(scene, point);
+  }
+}
+
 // Função para lidar com colisões
 function pointClick(scene, circle, angle) {
   const point = findPoint(circle, angle);
-  if (scene.gameStatus === 0) {
-    const currentShip = scene.positionableShips.getFirstAlive();
-    
-    if (!currentShip || point.occupied) return;
-
-    scene.positionableShips.remove(currentShip, false, false);
-
-    scene.tweens.add({
-      targets: currentShip,
-      x: point.x,
-      y: point.y,
-      duration: 400,
-      ease: "Linear",
-      onComplete: () => {
-        currentShip.destroy();
-        if (placeShip(scene, circle, angle, currentShip.type)) {
-          updateTexts(scene);
-          updateGameFlow(scene);
-        }
-      }
-    });
+  if (canPlaceShip(scene)) {
+    placeShipIfPossible(scene, circle, angle);
   } else {
-    if (point && point.ship) {
-      if (point.alive) {
-        const explosion = scene.add.sprite(point.x, point.y, "explosion");
-        explosion.play("explode").on("animationcomplete", () => explosion.destroy());
-        const fire = scene.add.sprite(point.x, point.y, "fire").play("burning").setScale(1.5);
-
-        point.alive = false;
-      }
-      
-      const randomX = Phaser.Math.Between(0, scene.scale.width);
-      scene.sound.play("laser2");
-      createTweenLaser(scene, randomX, -100, point.x, point.y);
-    } else {
-      placeMeteor(scene, point);
-    }
+    handleAttackOrDefense(scene, circle, angle);
   }
 }
 
