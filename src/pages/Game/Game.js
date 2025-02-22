@@ -368,7 +368,7 @@ function updateStatus(scene, status) {
     scene.statusGameText.setColor("#50FA7B");
   }
 
-  controlGameFlow(scene);
+  updateGameFlow(scene);
 }
 
 // Função para criar objetos do jogo
@@ -420,6 +420,7 @@ function createGameObjects() {
 
   // Cria animações
   createAnimations(this);
+  updateStatus(this, 0);
 }
 
 // Função para criar uma estrela
@@ -575,11 +576,13 @@ function placeShip(scene, circle, angle, type) {
     point.ship = true;
     point.type = type;
     point.alive = true;
+
+    return true
   }
 
   updateTexts(scene);
 
-  console.log(points);
+  return false
 }
 
 function rulesSpaceship(scene, circle, angle, type) {
@@ -588,18 +591,18 @@ function rulesSpaceship(scene, circle, angle, type) {
   const previousIndex = (pointsInCircle.findIndex(p => p.angle === angle) - 1 + pointsInCircle.length) % pointsInCircle.length;
   const nextIndex = (pointsInCircle.findIndex(p => p.angle === angle) + 1) % pointsInCircle.length;
 
-  const previousPoint = points[previousIndex];
-  const nextPoint = points[nextIndex];
+  const previousPoint = pointsInCircle[previousIndex];
+  const nextPoint = pointsInCircle[nextIndex];
 
-  if ((type === "black" && previousPoint.type === "black" || nextPoint.type === "black") || (type === "black" && previousPoint.type === "" && nextPoint.type === "")) {
+  if ((type === "black" && (previousPoint.type === "black" || nextPoint.type === "black")) || (type === "black" && previousPoint.type === "" && nextPoint.type === "")) {
       return true;
   }
 
-  if ((type === "red" && previousPoint.type === "red" || nextPoint.type === "red") || (type === "red" && previousPoint.type === "" && nextPoint.type === "")) {
+  if ((type === "red" && (previousPoint.type === "red" || nextPoint.type === "red")) || (type === "red" && previousPoint.type === "" && nextPoint.type === "")) {
       return true;
   }
 
-  if ((type === "green" && previousPoint.type === "green" || nextPoint.type === "green") || (type === "green" && previousPoint.type === "" && nextPoint.type === "")) {
+  if ((type === "green" && (previousPoint.type === "green" || nextPoint.type === "green")) || (type === "green" && previousPoint.type === "" && nextPoint.type === "")) {
       return true;
   }
 
@@ -610,7 +613,7 @@ function rulesSpaceship(scene, circle, angle, type) {
   return false;
 }
 
-function controlGameFlow(scene) {
+function updateGameFlow(scene) {
   const { width, height } = scene.sys.game.config;
 
   const countTypes = (type) => points.filter(point => point.type === type).length;
@@ -619,15 +622,27 @@ function controlGameFlow(scene) {
   const blackCount = countTypes("black");
   const blueCount = countTypes("blue");
   const greenCount = countTypes("green");
+  
+  console.log("Blue Count ", blueCount);
 
   if (scene.gameStatus === 0) {
-    if (blueCount < 5) {
+    if (blueCount == 0 && scene.positionableShips.getLength() === 0) {
       const shipPositions = [-2, -1, 0, 1, 2];
 
       shipPositions.forEach((pos, index) => {
-        if (index >= blueCount) {
-          const imageSpaceShip = scene.add.image((width / 2) + pos * 50, 100, "ship_blue").setScale(0.5).setOrigin(0.5, 0.5)
-          imageSpaceShip.type = "blue";
+        console.log(index, blueCount);
+        const imageSpaceShip = scene.add.image((width / 2) + pos * 50, 100, "ship_blue").setScale(0.5).setOrigin(0.5, 0.5)
+        imageSpaceShip.type = "blue";
+
+        scene.positionableShips.add(imageSpaceShip);
+      });
+    } else if (redCount == 0 && scene.positionableShips.getLength() === 0) {
+      const shipPositions = [-2, -1, 0, 1];
+
+      shipPositions.forEach((pos, index) => {
+        if (index >= redCount) {
+          const imageSpaceShip = scene.add.image((width / 2) + pos * 50, 100, "ship_red").setScale(0.5).setOrigin(0.5, 0.5)
+          imageSpaceShip.type = "red";
 
           scene.positionableShips.add(imageSpaceShip);
         }
@@ -672,6 +687,10 @@ function pointClick(scene, circle, angle) {
   const point = findPoint(circle, angle);
   if (scene.gameStatus === 0) {
     const currentShip = scene.positionableShips.getFirstAlive();
+    
+    if (!currentShip || point.occupied) return;
+
+    scene.positionableShips.remove(currentShip, false, false);
 
     scene.tweens.add({
       targets: currentShip,
@@ -681,11 +700,12 @@ function pointClick(scene, circle, angle) {
       ease: "Linear",
       onComplete: () => {
         currentShip.destroy();
-        placeShip(scene, circle, angle, currentShip.type);
+        if (placeShip(scene, circle, angle, currentShip.type)) {
+          updateTexts(scene);
+          updateGameFlow(scene);
+        }
       }
     });
-
-    
   } else {
     if (point && point.ship) {
       if (point.alive) {
@@ -703,8 +723,6 @@ function pointClick(scene, circle, angle) {
       placeMeteor(scene, point);
     }
   }
-
-  updateTexts(scene);
 }
 
 function placeMeteor(scene, point) {
