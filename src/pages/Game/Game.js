@@ -120,19 +120,19 @@ function createTextLayout(scene, width, height) {
 
   const redImage = scene.add.image(((width / 2) / 5) * 1, 60, "ship_red").setScale(0.5).setOrigin(0.5, 0.5);
   const redCountText = scene.add.text(((width / 2) / 5) * 1, 100, `x ${redCount}`, fontConfig).setOrigin(0.5, 0.5);
-  redCountText.nome = "red";
+  redCountText.name = "red";
 
   const blackImage = scene.add.image(((width / 2) / 5) * 2, 60, "ship_black").setScale(0.5).setOrigin(0.5, 0.5);
   const blackCountText = scene.add.text(((width / 2) / 5) * 2, 100, `x ${blackCount}`, fontConfig).setOrigin(0.5, 0.5);
-  blackCountText.nome = "black";
+  blackCountText.name = "black";
 
   const greenImage = scene.add.image(((width / 2) / 5) * 3, 60, "ship_green").setScale(0.5).setOrigin(0.5, 0.5);
   const greenCountText = scene.add.text(((width / 2) / 5) * 3, 100, `x ${greenCount}`, fontConfig).setOrigin(0.5, 0.5);
-  greenCountText.nome = "green";
+  greenCountText.name = "green";
 
   const blueImage = scene.add.image(((width / 2) / 5) * 4, 60, "ship_blue").setScale(0.5).setOrigin(0.5, 0.5);
   const blueCountText = scene.add.text(((width / 2) / 5) * 4, 100, `x ${blueCount}`, fontConfig).setOrigin(0.5, 0.5);
-  blueCountText.nome = "blue";
+  blueCountText.name = "blue";
 
   scene.textCounts.add(redCountText);
   scene.textCounts.add(blackCountText);
@@ -155,13 +155,13 @@ function updateTexts(scene) {
   textsCounts.forEach((text, index) => {
     if (index >= 4) return;
 
-    if (text.nome.includes("red")) {
+    if (text.name.includes("red")) {
       text.setText(`x ${newRedCount}`);
-    } else if (text.nome.includes("black")) {
+    } else if (text.name.includes("black")) {
       text.setText(`x ${newBlackCount}`);
-    } else if (text.nome.includes("blue")) {
+    } else if (text.name.includes("blue")) {
       text.setText(`x ${newBlueCount}`);
-    } else if (text.nome.includes("green")) {
+    } else if (text.name.includes("green")) {
       text.setText(`x ${newGreenCount}`);
     }
   });
@@ -242,7 +242,7 @@ function animatePlanning(scene, first, middle, end) {
     alpha: 1, // Fade out
     duration: 1000, // Duração de 1 segundo
     delay: 2000, // Espera 2 segundos antes de começar
-    angle: 180, // Gira 360 graus
+    angle: 180, // Gira 180 graus
     onAnimationEnd: () => {
       end[0].setAlpha(0);
       end[1].setAlpha(0);
@@ -643,6 +643,28 @@ function updateGameFlow(scene) {
           scene.positionableShips.add(imageSpaceShip);
         }
       });
+    } else if (blackCount == 0 && scene.positionableShips.getLength() === 0) {
+      const shipPositions = [-1, 0, 1];
+
+      shipPositions.forEach((pos, index) => {
+        if (index >= blackCount) {
+          const imageSpaceShip = scene.add.image((width / 2) + pos * 50, 100, "ship_black").setScale(0.5).setOrigin(0.5, 0.5)
+          imageSpaceShip.type = "black";
+
+          scene.positionableShips.add(imageSpaceShip);
+        }
+      });
+    } else if (greenCount == 0 && scene.positionableShips.getLength() === 0) {
+      const shipPositions = [-2, -1, 0, 1];
+
+      shipPositions.forEach((pos, index) => {
+        if (index >= greenCount) {
+          const imageSpaceShip = scene.add.image((width / 2) + pos * 50, 100, "ship_green").setScale(0.5).setOrigin(0.5, 0.5)
+          imageSpaceShip.type = "green";
+
+          scene.positionableShips.add(imageSpaceShip);
+        }
+      });
     }
   }
 }
@@ -721,6 +743,8 @@ function handleAttackOrDefense(scene, circle, angle) {
   } else {
     placeMeteor(scene, point);
   }
+
+  updateTexts(scene);
 }
 
 // Função para lidar com colisões
