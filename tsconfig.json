@@ -1,15 +1,23 @@
 {
   "compilerOptions": {
-    "strict": true, 
-    "jsx": "react-jsx", 
+    "target": "ES6",
+    "module": "ESNext",
+    "strict": true,
+    "jsx": "react-jsx",
     "allowJs": true,
-    "noImplicitAny": true, 
+    "noImplicitAny": true,
     "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./build",
     "baseUrl": "./src",
     "paths": {
       "@components/*": ["components/*"],
       "@pages/*": ["pages/*"],
-      "@assets/*": ["assets/*"]
+      "@assets/*": ["assets/*"],
+      "@game/*": ["game/*"]
     }
   },
   "include": ["src"],
