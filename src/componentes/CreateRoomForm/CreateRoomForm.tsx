@@ -3,7 +3,7 @@ import "./CreateRoomForm.css";
 import { useState } from "react";
 
 export const CreateRoomForm = () => {
-  const [roomType, setRoomType] = useState("public");
+  const [roomType, setRoomType] = useState<string>("public");
 
   return (
     <form className="CreateRoomForm">

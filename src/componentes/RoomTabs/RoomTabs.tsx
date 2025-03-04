@@ -5,7 +5,7 @@ import PublicRoomsList from "../PublicRoomsList";
 import CreateRoomForm from "../CreateRoomForm";
 
 export const RoomTabs = () => {
-  const [tabActive, setTabActive] = useState("create");
+  const [tabActive, setTabActive] = useState<string>("create");
 
   const tabs = [
     { id: "create", label: "Criar Sala" },
