@@ -1,55 +1,83 @@
 import { loadAssets } from './GameAssets'
 import { GameEvents } from './GameEvents'
 
-const fontConfig = {
+const fontConfigAlly = {
   fontSize: '20px',
   fontFamily: 'Lexend',
   fill: '#50FA7B',
   align: 'center',
 }
 
-const shipColors = ['red', 'black', 'green', 'blue']
+const fontConfigEnemy = {
+  fontSize: '20px',
+  fontFamily: 'Lexend',
+  fill: '#FF5555',
+  align: 'center',
+}
 
-// Função para criar texto
+const shipColors = ['red', 'black', 'green', 'blue']
+const shipSpacing = 5
+
 function createTextCounts(
   scene: Phaser.Scene,
   width: number,
   height: number,
-  title: string
+  allyLabel: string,
+  enemyLabel: string
 ) {
-  scene.add.text(width / 2 / 2, 20, title, fontConfig).setOrigin(0.5, 0.5)
+  const widthMiddle = width / 2
+
+  scene.add
+    .text(widthMiddle / 2, 20, allyLabel, fontConfigAlly)
+    .setOrigin(0.5, 0.5)
+
+  scene.add
+    .text(widthMiddle + widthMiddle / 2, 20, enemyLabel, fontConfigEnemy)
+    .setOrigin(0.5, 0.5)
+    .setOrigin(0.5, 0.5)
 
   shipColors.forEach((color, index) => {
-    const x = (width / 2 / 5) * (index + 1)
+    const x = (widthMiddle / shipSpacing) * (index + 1)
 
-    const image = scene.add
-      .image(x, 60, `ship_${color}`)
+    scene.add.image(x, 80, `ship_${color}`).setScale(0.5).setOrigin(0.5, 0.5)
+    scene.add
+      .image(widthMiddle + x, 80, `ship_${color}`)
       .setScale(0.5)
       .setOrigin(0.5, 0.5)
 
-    const countText = scene.add
-      .text(x, 100, `x 0`, fontConfig) // Inicialmente todas começam com 0
+    const countTextAlly = scene.add
+      .text(x, 120, `x 0`, fontConfigAlly)
       .setOrigin(0.5, 0.5)
 
-    countText.name = color
+    const countTextEnemy = scene.add
+      .text(widthMiddle + x, 120, `x 0`, fontConfigEnemy)
+      .setOrigin(0.5, 0.5)
+
+    countTextAlly.name = color
+    countTextEnemy.name = color
 
     if (scene instanceof UIScene) {
-      scene.textCounts.add(image)
-      scene.textCounts.add(countText)
-      scene.textObjects[color] = countText
+      scene.textAlly[color] = countTextAlly
+      scene.textEnemy[color] = countTextEnemy
     }
   })
 }
 
-function updateTextCount(scene: Phaser.Scene, color: string, count: number) {
+function updateTextAlly(scene: Phaser.Scene, color: string, count: number) {
   if (scene instanceof UIScene) {
-    scene.textObjects[color].setText(`x ${count}`)
+    scene.textAlly[color].setText(`x ${count}`)
+  }
+}
+
+function updateTextEnemy(scene: Phaser.Scene, color: string, count: number) {
+  if (scene instanceof UIScene) {
+    scene.textEnemy[color].setText(`x ${count}`)
   }
 }
 
 export class UIScene extends Phaser.Scene {
-  textCounts!: Phaser.GameObjects.Group
-  textObjects: Record<string, Phaser.GameObjects.Text> = {}
+  textAlly: Record<string, Phaser.GameObjects.Text> = {}
+  textEnemy: Record<string, Phaser.GameObjects.Text> = {}
   customData: any
 
   constructor(config?: any) {
@@ -75,14 +103,25 @@ export class UIScene extends Phaser.Scene {
     const width = Number(this.sys.game.config.width)
     const height = Number(this.sys.game.config.height)
 
-    this.textCounts = this.add.group()
-
-    createTextCounts(this, width, height, 'Player 1 - Naves')
+    createTextCounts(
+      this,
+      width,
+      height,
+      'Player 1 - Naves',
+      'Player 2 - Naves'
+    )
 
     GameEvents.on(
-      'updateTextCountShips',
+      'updateTextCountShipsAlly',
       (data: { color: string; count: number }) => {
-        updateTextCount(this, data.color, data.count)
+        updateTextAlly(this, data.color, data.count)
+      }
+    )
+
+    GameEvents.on(
+      'updateTextCountShipsEnemy',
+      (data: { color: string; count: number }) => {
+        updateTextEnemy(this, data.color, data.count)
       }
     )
   }
