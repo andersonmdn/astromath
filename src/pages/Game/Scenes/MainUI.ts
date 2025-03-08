@@ -1,5 +1,5 @@
-import { loadAssets } from './GameAssets'
-import { GameEvents } from './GameEvents'
+import { GameEvents } from '../GameEvents'
+import { loadAssets } from '../Scripts/Assets'
 
 const fontConfigAlly = {
   fontSize: '20px',
@@ -56,7 +56,7 @@ function createTextCounts(
     countTextAlly.name = color
     countTextEnemy.name = color
 
-    if (scene instanceof UIScene) {
+    if (scene instanceof MainUI) {
       scene.textAlly[color] = countTextAlly
       scene.textEnemy[color] = countTextEnemy
     }
@@ -64,24 +64,24 @@ function createTextCounts(
 }
 
 function updateTextAlly(scene: Phaser.Scene, color: string, count: number) {
-  if (scene instanceof UIScene) {
+  if (scene instanceof MainUI) {
     scene.textAlly[color].setText(`x ${count}`)
   }
 }
 
 function updateTextEnemy(scene: Phaser.Scene, color: string, count: number) {
-  if (scene instanceof UIScene) {
+  if (scene instanceof MainUI) {
     scene.textEnemy[color].setText(`x ${count}`)
   }
 }
 
-export class UIScene extends Phaser.Scene {
+export class MainUI extends Phaser.Scene {
   textAlly: Record<string, Phaser.GameObjects.Text> = {}
   textEnemy: Record<string, Phaser.GameObjects.Text> = {}
   customData: any
 
   constructor(config?: any) {
-    super({ key: 'UIScene', active: false }) // Garante que a cena tenha um identificador único
+    super({ key: 'SceneMainUI', active: false }) // Garante que a cena tenha um identificador único
 
     if (config) {
       this.customData = config // Guarda os dados

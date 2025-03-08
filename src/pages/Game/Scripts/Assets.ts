@@ -1,6 +1,6 @@
-import IGameAssets from '../../types/IGameAssets'
+import IAssets from '../../../types/IAssets'
 
-const GameAssets: IGameAssets = {
+const Assets: IAssets = {
   images: {
     laser: '/assets/kenney_space-shooter-redux/PNG/Lasers/laserRed01.png',
     star_1: '/assets/kenney_space-shooter-redux/PNG/Effects/star1.png',
@@ -55,16 +55,15 @@ const GameAssets: IGameAssets = {
 function loadAssets(scene: Phaser.Scene) {
   scene.load.setCORS('anonymous')
 
-  Object.entries(GameAssets.images).forEach(([key, path]) =>
+  Object.entries(Assets.images).forEach(([key, path]) =>
     scene.load.image(key, path)
   )
-  Object.entries(GameAssets.spritesheets).forEach(
-    ([key, { path, frameConfig }]) =>
-      scene.load.spritesheet(key, path, frameConfig)
+  Object.entries(Assets.spritesheets).forEach(([key, { path, frameConfig }]) =>
+    scene.load.spritesheet(key, path, frameConfig)
   )
-  Object.entries(GameAssets.audio).forEach(([key, path]) =>
+  Object.entries(Assets.audio).forEach(([key, path]) =>
     scene.load.audio(key, path)
   )
 }
 
-export { GameAssets, loadAssets }
+export { Assets, loadAssets }

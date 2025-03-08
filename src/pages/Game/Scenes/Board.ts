@@ -1,5 +1,5 @@
-import { loadAssets } from './GameAssets'
-import { GameEvents } from './GameEvents'
+import { GameEvents } from '../GameEvents'
+import { loadAssets } from '../Scripts/Assets'
 
 interface ICoordinates {
   circle: number
@@ -20,7 +20,7 @@ const angleTextFontConfig = {
 }
 
 function drawBoard(
-  scene: GameBoard, // Garantindo que `scene` tenha `coordinatesAlly`
+  scene: Board, // Garantindo que `scene` tenha `coordinatesAlly`
   width: number,
   height: number,
   color: string = '#282a36'
@@ -154,11 +154,11 @@ function createInteractivePoint(
   scene.add.circle(position.x, position.y, 25, 0x00ff00).setAlpha(0.1)
 
   pointObject.on('pointerdown', () =>
-    pointClick(scene as GameBoard, circle, angle, type)
+    pointClick(scene as Board, circle, angle, type)
   )
 }
 
-function tryPlaceAllyShip(scene: GameBoard, coordinates: ICoordinates) {
+function tryPlaceAllyShip(scene: Board, coordinates: ICoordinates) {
   if (coordinates) {
     if (coordinates.occupied) {
       console.log('Posição ocupada')
@@ -167,11 +167,7 @@ function tryPlaceAllyShip(scene: GameBoard, coordinates: ICoordinates) {
   }
 }
 
-function placeAllyShip(
-  scene: GameBoard,
-  coordinates: ICoordinates,
-  type: string
-) {
+function placeAllyShip(scene: Board, coordinates: ICoordinates, type: string) {
   scene.add.image(coordinates.x, coordinates.y, `ship_${type}`).setScale(0.5)
 
   console.log(
@@ -182,12 +178,7 @@ function placeAllyShip(
   )
 }
 
-function pointClick(
-  scene: GameBoard,
-  circle: number,
-  angle: number,
-  type: string
-) {
+function pointClick(scene: Board, circle: number, angle: number, type: string) {
   console.log(type)
 
   const coordinates =
@@ -199,7 +190,7 @@ function pointClick(
           coord => coord.circle === circle && coord.angle === angle
         )
 
-  // ;(scene as GameBoard).gameStatus = 'attacking'
+  // ;(scene as Board).gameStatus = 'attacking'
 
   if (coordinates && type === 'ally' && scene.gameStatus === 'setup') {
     tryPlaceAllyShip(scene, coordinates)
@@ -208,13 +199,13 @@ function pointClick(
   console.log('Clicou no ponto', circle, angle, coordinates)
 }
 
-export class GameBoard extends Phaser.Scene {
+export class Board extends Phaser.Scene {
   coordinatesAlly: ICoordinates[] = []
   coordinatesEnemy: ICoordinates[] = []
   gameStatus: 'setup' | 'attacking' | 'receiving attack' = 'setup'
 
   constructor() {
-    super({ key: 'GameBoard', active: true }) // Garante que a cena tenha um identificador único
+    super({ key: 'SceneBoard', active: false }) // Garante que a cena tenha um identificador único
   }
 
   preload() {

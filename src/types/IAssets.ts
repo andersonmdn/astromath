@@ -1,4 +1,4 @@
-interface IGameAssets {
+interface IAssets {
   images: { [key: string]: string }
   spritesheets: {
     [key: string]: {
@@ -9,4 +9,4 @@ interface IGameAssets {
   audio: { [key: string]: string }
 }
 
-export default IGameAssets
+export default IAssets

@@ -1,8 +1,8 @@
 import Phaser from 'phaser'
-import { GameBoard } from './GameBoard'
-import { MainScene } from './MainScene'
-import { SetupScene } from './SetupScene'
-import { UIScene } from './UIScene'
+import { Board } from './Scenes/Board'
+import { Main } from './Scenes/Main'
+import { MainUI } from './Scenes/MainUI'
+import { Preparation } from './Scenes/Preparation'
 
 export const createGame = (parentId: string) => {
   const parentElement = document.getElementById(parentId)
@@ -17,7 +17,7 @@ export const createGame = (parentId: string) => {
       ? Math.max(600, parentElement.clientHeight) - margin
       : 600,
     parent: parentId,
-    scene: [MainScene, UIScene, GameBoard, SetupScene], // Certifique-se de que a cena está sendo incluída
+    scene: [Main, MainUI, Board, Preparation], // Certifique-se de que a cena está sendo incluída
   }
 
   return new Phaser.Game(gameConfig)
