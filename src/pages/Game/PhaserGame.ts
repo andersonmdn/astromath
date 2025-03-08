@@ -1,4 +1,5 @@
 import Phaser from 'phaser'
+import { GameBoard } from './GameBoard'
 import { MainScene } from './MainScene'
 import { UIScene } from './UIScene'
 
@@ -15,7 +16,7 @@ export const createGame = (parentId: string) => {
       ? Math.max(600, parentElement.clientHeight) - margin
       : 600,
     parent: parentId,
-    scene: [MainScene, UIScene], // Certifique-se de que a cena está sendo incluída
+    scene: [MainScene, UIScene, GameBoard], // Certifique-se de que a cena está sendo incluída
   }
 
   return new Phaser.Game(gameConfig)
