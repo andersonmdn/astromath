@@ -1,6 +1,5 @@
 import Phaser from 'phaser'
 import { loadAssets } from './GameAssets'
-import { GameEvents } from './GameEvents'
 import { createBackground } from './MainSceneBackground'
 
 export class MainScene extends Phaser.Scene {
@@ -29,13 +28,20 @@ export class MainScene extends Phaser.Scene {
     const button = this.add
       .image(100, height - 100, 'button')
       .setInteractive()
-      .setScale(0.3)
+      .setScale(0.5)
+
+    this.add
+      .text(button.x, button.y, 'Preparação', {
+        fontSize: '20px',
+        color: 'white',
+        align: 'center',
+        fontFamily: 'Lexend',
+      })
+      .setOrigin(0.5)
 
     button.on('pointerdown', () => {
-      GameEvents.emit('updateTextCountShips', {
-        color: 'blue',
-        count: 1,
-      })
+      this.scene.remove('UIScene')
+      this.scene.start('SetupScene')
     })
   }
 }

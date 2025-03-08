@@ -81,7 +81,7 @@ export class UIScene extends Phaser.Scene {
   customData: any
 
   constructor(config?: any) {
-    super({ key: 'UIScene', active: true }) // Garante que a cena tenha um identificador único
+    super({ key: 'UIScene', active: false }) // Garante que a cena tenha um identificador único
 
     if (config) {
       this.customData = config // Guarda os dados

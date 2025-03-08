@@ -1,4 +1,5 @@
 import { loadAssets } from './GameAssets'
+import { GameEvents } from './GameEvents'
 
 interface ICoordinates {
   circle: number
@@ -152,11 +153,37 @@ function createInteractivePoint(
     .setInteractive()
   scene.add.circle(position.x, position.y, 25, 0x00ff00).setAlpha(0.1)
 
-  pointObject.on('pointerdown', () => pointClick(scene, circle, angle, type))
+  pointObject.on('pointerdown', () =>
+    pointClick(scene as GameBoard, circle, angle, type)
+  )
+}
+
+function tryPlaceAllyShip(scene: GameBoard, coordinates: ICoordinates) {
+  if (coordinates) {
+    if (coordinates.occupied) {
+      console.log('Posição ocupada')
+      return
+    }
+  }
+}
+
+function placeAllyShip(
+  scene: GameBoard,
+  coordinates: ICoordinates,
+  type: string
+) {
+  scene.add.image(coordinates.x, coordinates.y, `ship_${type}`).setScale(0.5)
+
+  console.log(
+    'Clicou no ponto',
+    coordinates.circle,
+    coordinates.angle,
+    coordinates
+  )
 }
 
 function pointClick(
-  scene: Phaser.Scene,
+  scene: GameBoard,
   circle: number,
   angle: number,
   type: string
@@ -165,17 +192,17 @@ function pointClick(
 
   const coordinates =
     type === 'ally'
-      ? (scene as GameBoard).coordinatesAlly.find(
+      ? scene.coordinatesAlly.find(
           coord => coord.circle === circle && coord.angle === angle
         )
-      : (scene as GameBoard).coordinatesEnemy.find(
+      : scene.coordinatesEnemy.find(
           coord => coord.circle === circle && coord.angle === angle
         )
 
-  console.log(coordinates)
+  // ;(scene as GameBoard).gameStatus = 'attacking'
 
-  if (coordinates) {
-    scene.add.image(coordinates.x, coordinates.y, 'ship_red').setScale(0.5)
+  if (coordinates && type === 'ally' && scene.gameStatus === 'setup') {
+    tryPlaceAllyShip(scene, coordinates)
   }
 
   console.log('Clicou no ponto', circle, angle, coordinates)
@@ -184,6 +211,7 @@ function pointClick(
 export class GameBoard extends Phaser.Scene {
   coordinatesAlly: ICoordinates[] = []
   coordinatesEnemy: ICoordinates[] = []
+  gameStatus: 'setup' | 'attacking' | 'receiving attack' = 'setup'
 
   constructor() {
     super({ key: 'GameBoard', active: true }) // Garante que a cena tenha um identificador único
@@ -212,11 +240,11 @@ export class GameBoard extends Phaser.Scene {
     //   }
     // )
 
-    // GameEvents.on(
-    //   'updateTextCountShipsEnemy',
-    //   (data: { color: string; count: number }) => {
-    //     updateTextEnemy(this, data.color, data.count)
-    //   }
-    // )
+    GameEvents.on(
+      'placeAllyShipInSetupFase ',
+      (data: { color: string; coordinates: ICoordinates }) => {
+        placeAllyShip(this, data.coordinates, data.color)
+      }
+    )
   }
 }
