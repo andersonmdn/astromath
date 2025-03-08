@@ -34,7 +34,7 @@ function drawBoard(
     enemy: { x: (width * 3) / 4, y: height / 2 },
   }
 
-  const radii = [90, 150, 200]
+  const radii = [100, 150, 200]
   const extraLineLength = 35
 
   radii.forEach((radius, index) => {
@@ -150,7 +150,7 @@ function createInteractivePoint(
   const pointObject = scene.add
     .zone(position.x, position.y, 45, 45)
     .setInteractive()
-  scene.add.image(position.x, position.y, 'point').setScale(0.5)
+  scene.add.circle(position.x, position.y, 25, 0x00ff00).setAlpha(0.1)
 
   pointObject.on('pointerdown', () => pointClick(scene, circle, angle, type))
 }
@@ -207,8 +207,7 @@ export class GameBoard extends Phaser.Scene {
     drawBoard(this, width, height)
 
     // GameEvents.on(
-    //   'updateTextCountShipsAlly',
-    //   (data: { color: string; count: number }) => {
+    //   'placeShip', (data: { color: string; count: number }) => {
     //     updateTextAlly(this, data.color, data.count)
     //   }
     // )
