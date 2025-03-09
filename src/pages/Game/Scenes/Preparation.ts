@@ -234,29 +234,32 @@ export class Preparation extends Phaser.Scene {
         circle: number
         angle: number
       }) => {
-        if (
-          canPlaceShip(
-            data.coordinates,
-            data.circle,
-            data.angle,
-            scenePreparationRules[0].color
-          )
-        ) {
-          console.log('Pode posicionar')
-          GameEvents.emit('placeShip', {
-            circle: data.circle,
-            angle: data.angle,
-            color: scenePreparationRules[0].color,
-          })
+        if (scenePreparationRules.length > 0) {
+          if (
+            canPlaceShip(
+              data.coordinates,
+              data.circle,
+              data.angle,
+              scenePreparationRules[0].color
+            )
+          ) {
+            GameEvents.emit('placeShip', {
+              circle: data.circle,
+              angle: data.angle,
+              color: scenePreparationRules[0].color,
+            })
 
-          scenePreparationRules[0].quantity--
-          this.shipGroup[scenePreparationRules[0].color].clear(true, true)
+            scenePreparationRules[0].quantity--
+            this.shipGroup[scenePreparationRules[0].color].clear(true, true)
 
-          if (scenePreparationRules[0].quantity == 0) {
-            scenePreparationRules.shift()
+            if (scenePreparationRules[0].quantity == 0) {
+              scenePreparationRules.shift()
+            }
+
+            drawPreparationRules(this, width)
           }
-
-          drawPreparationRules(this, width)
+        } else {
+          GameEvents.emit('preparationEnd', {})
         }
       }
     )

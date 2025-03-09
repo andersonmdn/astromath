@@ -1,13 +1,8 @@
 import Phaser from 'phaser'
+import Phase from '../../../enums/Phase'
 import { GameEvents } from '../GameEvents'
 import { loadAssets } from '../Scripts/Assets'
 import { createBackground } from '../Scripts/MainBackground'
-
-enum Phase {
-  Preparation = 'preparation',
-  Attack = 'attack',
-  Defense = 'defense',
-}
 
 export class Main extends Phaser.Scene {
   phase: Phase
@@ -37,6 +32,11 @@ export class Main extends Phaser.Scene {
 
     GameEvents.on('changeStatus', (phase: Phase) => {
       this.updatePhase(phase)
+    })
+
+    GameEvents.on('preparationEnd', () => {
+      //Transmintir para para o Backend que a preparação acabou
+      console.log('Preparação finalizada')
     })
 
     this.add
