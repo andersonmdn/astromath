@@ -192,7 +192,7 @@ export class Preparation extends Phaser.Scene {
 
     //Background
     const width = Number(this.sys.game.config.width)
-    const height = Number(this.sys.game.config.height)
+    // const height = Number(this.sys.game.config.height)
 
     scenePreparationRules.forEach(rule => {
       this.shipGroup[rule.color] = this.add.group()
@@ -252,7 +252,7 @@ export class Preparation extends Phaser.Scene {
             scenePreparationRules[0].quantity--
             this.shipGroup[scenePreparationRules[0].color].clear(true, true)
 
-            if (scenePreparationRules[0].quantity == 0) {
+            if (scenePreparationRules[0].quantity === 0) {
               scenePreparationRules.shift()
             }
 
