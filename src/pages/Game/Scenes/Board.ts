@@ -1,16 +1,6 @@
+import ICoordinates from '../../../types/ICoordinates'
 import { GameEvents } from '../GameEvents'
 import { loadAssets } from '../Scripts/Assets'
-
-interface ICoordinates {
-  circle: number
-  angle: number
-  x: number
-  y: number
-  occupied: boolean
-  ship: boolean
-  type: string
-  alive: boolean
-}
 
 const angleTextFontConfig = {
   fontSize: '16px',
@@ -158,30 +148,28 @@ function createInteractivePoint(
   )
 }
 
-function tryPlaceAllyShip(scene: Board, coordinates: ICoordinates) {
+function tryPlaceAllyShip(
+  scene: Board,
+  coordinates: ICoordinates[],
+  coordinate: ICoordinates
+) {
   if (coordinates) {
-    if (coordinates.occupied) {
-      console.log('Posição ocupada')
-      return
-    }
+    GameEvents.emit('tryPlaceShip', {
+      coordinates: coordinates,
+      circle: coordinate.circle,
+      angle: coordinate.angle,
+    })
   }
 }
 
 function placeAllyShip(scene: Board, coordinates: ICoordinates, type: string) {
   scene.add.image(coordinates.x, coordinates.y, `ship_${type}`).setScale(0.5)
-
-  console.log(
-    'Clicou no ponto',
-    coordinates.circle,
-    coordinates.angle,
-    coordinates
-  )
 }
 
 function pointClick(scene: Board, circle: number, angle: number, type: string) {
   console.log(type)
 
-  const coordinates =
+  const coordinate =
     type === 'ally'
       ? scene.coordinatesAlly.find(
           coord => coord.circle === circle && coord.angle === angle
@@ -192,11 +180,16 @@ function pointClick(scene: Board, circle: number, angle: number, type: string) {
 
   // ;(scene as Board).gameStatus = 'attacking'
 
-  if (coordinates && type === 'ally' && scene.gameStatus === 'setup') {
-    tryPlaceAllyShip(scene, coordinates)
+  if (
+    coordinate &&
+    type === 'ally' &&
+    scene.gameStatus === 'setup' &&
+    !coordinate.occupied
+  ) {
+    tryPlaceAllyShip(scene, scene.coordinatesAlly, coordinate)
   }
 
-  console.log('Clicou no ponto', circle, angle, coordinates)
+  console.log('Clicou no ponto', circle, angle, coordinate)
 }
 
 export class Board extends Phaser.Scene {
@@ -225,11 +218,24 @@ export class Board extends Phaser.Scene {
 
     drawBoard(this, width, height)
 
-    // GameEvents.on(
-    //   'placeShip', (data: { color: string; count: number }) => {
-    //     updateTextAlly(this, data.color, data.count)
-    //   }
-    // )
+    GameEvents.on(
+      'placeShip',
+      (data: { circle: number; angle: number; color: string }) => {
+        const coordinate = this.coordinatesAlly.find(
+          coord => coord.circle === data.circle && coord.angle === data.angle
+        )
+
+        if (coordinate) {
+          this.add
+            .image(coordinate.x, coordinate.y, `ship_${data.color}`)
+            .setScale(0.5)
+          coordinate.alive = true
+          coordinate.occupied = true
+          coordinate.ship = true
+          coordinate.type = data.color
+        }
+      }
+    )
 
     GameEvents.on(
       'placeAllyShipInSetupFase ',

@@ -1,4 +1,5 @@
 import Phaser from 'phaser'
+import ICoordinates from '../../../types/ICoordinates'
 import { GameEvents } from '../GameEvents'
 import { loadAssets } from '../Scripts/Assets'
 
@@ -45,6 +46,97 @@ const scenePreparationRules: IPreparationRule[] = [
     quantity: 4,
   },
 ]
+
+function getAdjacentCoordinates(
+  coordinates: ICoordinates[],
+  circle: number,
+  angle: number,
+  allowAdjacentCircle: boolean = true
+): ICoordinates[] {
+  return coordinates.filter(coord => {
+    const adjustedAnglePlus = (angle + 30) % 360
+    const adjustedAngleMinus = (angle - 30 + 360) % 360
+
+    const sameCircle =
+      coord.circle === circle &&
+      (coord.angle === adjustedAnglePlus || coord.angle === adjustedAngleMinus)
+
+    if (!allowAdjacentCircle) {
+      return sameCircle
+    }
+
+    const adjacentCircle =
+      Math.abs(coord.circle - circle) === 1 && coord.angle === angle
+
+    return sameCircle || adjacentCircle
+  })
+}
+
+function canPlaceShip(
+  coordinates: ICoordinates[],
+  circle: number,
+  angle: number,
+  color: string
+): boolean {
+  const adjacent = getAdjacentCoordinates(
+    coordinates,
+    circle,
+    angle,
+    color === 'green' ? false : true
+  )
+
+  // Filtrar vizinhos que já possuem uma nave
+  if (!adjacent) return true
+
+  const sameTypeNeighbors = adjacent.filter(
+    coord => coord.ship && coord.type === color
+  )
+  const differentTypeNeighbors = adjacent.filter(
+    coord => coord.ship && coord.type !== color
+  )
+
+  const sameColorShips = coordinates.filter(
+    coord => coord.ship && coord.type === color
+  ).length
+  console.log('Quantidade de naves da mesma cor:', sameColorShips)
+
+  // // Se houver algum vizinho de tipo diferente, não pode posicionar
+  // if (differentTypeNeighbors.length > 0) {
+  //   console.log('Vizinho de tipo diferente')
+  //   return false
+  // }
+
+  // Verifica a quantidade de vizinhos do mesmo tipo conforme a regra
+  const count = sameTypeNeighbors.length
+  console.log('Vizinhos do mesmo tipo:', count)
+
+  switch (color) {
+    case 'blue':
+      return (
+        sameTypeNeighbors.length === 0 && differentTypeNeighbors.length === 0
+      )
+    case 'black':
+      return (
+        sameTypeNeighbors.length > 0 || sameColorShips === 0 /*&&
+        differentTypeNeighbors.length === 0*/
+      )
+    case 'red':
+      return (
+        sameTypeNeighbors.length === 1 ||
+        sameColorShips === 0 ||
+        sameColorShips === 2
+      ) /*&&
+      differentTypeNeighbors.length === 0*/
+
+    case 'green':
+      return (
+        sameTypeNeighbors.length > 0 || sameColorShips === 0 /*&&
+        differentTypeNeighbors.length === 0*/
+      )
+    default:
+      return false
+  }
+}
 
 function drawPreparationRules(scene: Preparation, width: number) {
   let previousColor: string | null = null
@@ -135,20 +227,39 @@ export class Preparation extends Phaser.Scene {
 
     drawPreparationRules(this, width)
 
-    GameEvents.off('tryPlaceShip', () => {
-      console.log('Tentando posicionar nave')
-    })
+    GameEvents.on(
+      'tryPlaceShip',
+      (data: {
+        coordinates: ICoordinates[]
+        circle: number
+        angle: number
+      }) => {
+        if (
+          canPlaceShip(
+            data.coordinates,
+            data.circle,
+            data.angle,
+            scenePreparationRules[0].color
+          )
+        ) {
+          console.log('Pode posicionar')
+          GameEvents.emit('placeShip', {
+            circle: data.circle,
+            angle: data.angle,
+            color: scenePreparationRules[0].color,
+          })
 
-    GameEvents.on('tryPlaceShip', () => {
-      scenePreparationRules[0].quantity--
-      this.shipGroup[scenePreparationRules[0].color].clear(true, true)
+          scenePreparationRules[0].quantity--
+          this.shipGroup[scenePreparationRules[0].color].clear(true, true)
 
-      if (scenePreparationRules[0].quantity == 0) {
-        scenePreparationRules.shift()
+          if (scenePreparationRules[0].quantity == 0) {
+            scenePreparationRules.shift()
+          }
+
+          drawPreparationRules(this, width)
+        }
       }
-
-      drawPreparationRules(this, width)
-    })
+    )
   }
 
   update() {

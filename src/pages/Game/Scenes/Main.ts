@@ -44,7 +44,6 @@ export class Main extends Phaser.Scene {
       .setInteractive()
       .on('pointerdown', () => {
         console.log('Botão de ataque pressionado')
-        GameEvents.emit('tryPlaceShip')
       })
   }
 
