@@ -13,3 +13,27 @@ export const login = (email: string, password: string) =>
 
 export const resetPassword = (email: string) =>
   sendPasswordResetEmail(auth, email)
+
+export const logout = () => auth.signOut()
+
+export const isAuthenticated = () => {
+  return new Promise<boolean>(resolve => {
+    const unsubscribe = auth.onAuthStateChanged(user => {
+      resolve(!!user)
+      unsubscribe()
+    })
+  })
+}
+
+export const deleteCurrentUser = async () => {
+  try {
+    if (auth.currentUser) {
+      await auth.currentUser.delete()
+      return true
+    }
+    return false
+  } catch (error) {
+    console.error('Erro ao deletar usuário:', error)
+    return false
+  }
+}

@@ -1,24 +1,44 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import { login } from '../../services/authService'
 import styles from './Login.module.css'
 
 const Login = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [message, setMessage] = useState<{
+    text: string
+    type: 'success' | 'error' | ''
+  }>({
+    text: '',
+    type: '',
+  })
   const navigate = useNavigate()
 
   const handleLogin = async () => {
+    if (!email || !password) {
+      toast.error('Por favor, informe email e senha.')
+      return
+    }
     try {
       await login(email, password)
-      alert('Login feito com sucesso!')
-      navigate('/lobby')
+      toast.success('Login feito com sucesso!')
+      setTimeout(() => navigate('/lobby'), 1000)
     } catch (error) {
       console.error(error)
-      if (error instanceof Error) {
-        alert(`Erro ao fazer login: ${error.message}`)
+      const errorWithCode = error as Error & { code?: string }
+
+      if (errorWithCode.code === 'auth/user-not-found') {
+        toast.error('Usuário não encontrado.')
+      } else if (errorWithCode.code === 'auth/invalid-credential') {
+        toast.error('Credenciais inválidas. Verifique seu email e senha.')
+      } else if (errorWithCode.code === 'auth/invalid-email') {
+        toast.error('Email inválido.')
+      } else if (errorWithCode.code === 'auth/too-many-requests') {
+        toast.error('Muitas tentativas de login. Tente novamente mais tarde.')
       } else {
-        alert('Erro desconhecido ao fazer login.')
+        toast.error('Erro desconhecido ao fazer login.')
       }
     }
   }
@@ -88,6 +108,15 @@ const Login = () => {
           </small>
         </div>
       </div>
+      {message.text && (
+        <span
+          className={`${styles.message} ${
+            message.type === 'error' ? styles.error : styles.success
+          }`}
+        >
+          {message.text}
+        </span>
+      )}
     </div>
   )
 }

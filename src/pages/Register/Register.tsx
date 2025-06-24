@@ -23,10 +23,23 @@ const Register = () => {
       const userCredential = await signUp(email, password)
       const uid = userCredential.user.uid
 
-      await createUserProfile(uid, email, username, birthday)
-
-      alert('Conta criada com sucesso!')
-      navigate('/')
+      try {
+        await createUserProfile(uid, email, username, birthday)
+        alert('Conta criada com sucesso!')
+        navigate('/')
+      } catch (error: any) {
+        if (
+          error.code === 'permission-denied' ||
+          (error.message &&
+            error.message.includes('Missing or insufficient permissions'))
+        ) {
+          await userCredential.user.delete()
+          console.error('Erro de permissão ao criar perfil:', error)
+          alert('Erro de permissão ao criar perfil. Cadastro cancelado.')
+        } else {
+          alert('Erro ao criar perfil: ' + error.message)
+        }
+      }
     } catch (error: any) {
       console.error(error)
       if (error.code === 'auth/email-already-in-use') {

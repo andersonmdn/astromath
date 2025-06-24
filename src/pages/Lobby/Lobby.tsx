@@ -1,18 +1,13 @@
 // src/components/Lobby/Lobby.tsx
 import 'bootstrap/dist/css/bootstrap.min.css'
-import {
-  addDoc,
-  collection,
-  doc,
-  getDoc,
-  onSnapshot,
-  orderBy,
-  query,
-  where,
-} from 'firebase/firestore'
-import { useEffect, useState } from 'react'
+import { getAuth } from 'firebase/auth'
+import { doc, getDoc } from 'firebase/firestore'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { db } from '../../firebase/firebaseConfig'
+import { useRooms } from '../../hooks/useRooms'
+import { logout } from '../../services/authService'
+import { createRoom } from '../../services/roomService'
 import styles from './Lobby.module.css'
 
 const Lobby = () => {
@@ -20,38 +15,31 @@ const Lobby = () => {
   const [password, setPassword] = useState('')
   const [joinCode, setJoinCode] = useState('')
   const [joinPassword, setJoinPassword] = useState('')
-  const [publicRooms, setPublicRooms] = useState<any[]>([])
   const [showPrivateJoinForm, setShowPrivateJoinForm] = useState(false)
   const navigate = useNavigate()
 
-  useEffect(() => {
-    const q = query(
-      collection(db, 'salas'),
-      where('tipo', '==', 'publica'),
-      orderBy('criadaEm', 'desc')
-    )
-
-    const unsubscribe = onSnapshot(q, snapshot => {
-      const rooms = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-      setPublicRooms(rooms)
-    })
-
-    return () => unsubscribe()
-  }, [])
+  const { publicRooms, loading } = useRooms()
 
   const handleCreateRoom = async () => {
-    const roomData = {
-      nome: roomName,
-      tipo: 'privada',
-      senha: password,
-      jogadores: 0,
-      criadaEm: new Date(),
-    }
-
     try {
-      const docRef = await addDoc(collection(db, 'salas'), roomData)
+      const auth = getAuth()
+      const user = auth.currentUser
+
+      if (!user) {
+        alert('Você precisa estar logado para criar uma sala.')
+        return
+      }
+
+      const roomId = await createRoom({
+        name: roomName,
+        type: password ? 'private' : 'public',
+        password,
+        createdBy: user.uid,
+        players: [user.uid],
+      })
+
       alert('Sala criada com sucesso!')
-      navigate(`/sala/${docRef.id}`)
+      navigate(`/sala/${roomId}`)
     } catch (error) {
       console.error('Erro ao criar sala:', error)
       alert('Erro ao criar sala')
@@ -60,16 +48,16 @@ const Lobby = () => {
 
   const handleJoinPrivateRoom = async () => {
     try {
-      const salaRef = doc(db, 'salas', joinCode.trim())
+      const salaRef = doc(db, 'rooms', joinCode.trim())
       const salaSnap = await getDoc(salaRef)
 
       if (!salaSnap.exists()) return alert('Sala não encontrada')
 
       const sala = salaSnap.data()
-      if (!sala || sala.tipo !== 'privada')
+      if (!sala || sala.type !== 'private')
         return alert('Essa não é uma sala privada')
 
-      if (sala.senha !== joinPassword) return alert('Senha incorreta')
+      if (sala.password !== joinPassword) return alert('Senha incorreta')
 
       navigate(`/sala/${salaRef.id}`)
     } catch (error) {
@@ -82,8 +70,21 @@ const Lobby = () => {
     navigate(`/sala/${roomId}`)
   }
 
+  const handleLogout = async () => {
+    await logout()
+    navigate('/')
+  }
+
   return (
     <div className={styles.containerMain}>
+      {/* Botão de logout no canto superior direito */}
+      <button
+        className={`btn btn-outline-danger ${styles.logoutButton}`}
+        onClick={handleLogout}
+      >
+        Logout
+      </button>
+
       <h1 className={`${styles.title} fw-bold text-uppercase fs-3`}>
         ASTROMATH
       </h1>
@@ -128,8 +129,8 @@ const Lobby = () => {
               {publicRooms.map(room => (
                 <div key={room.id} className={styles.cardRoom}>
                   <div className="d-flex justify-content-between align-items-center">
-                    <span>Sala: {room.nome}</span>
-                    <span>{room.jogadores}/2</span>
+                    <span>Sala: {room.name}</span>
+                    <span>{room.players.length}/2</span>
                   </div>
                 </div>
               ))}

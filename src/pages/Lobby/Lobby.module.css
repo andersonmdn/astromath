@@ -85,3 +85,10 @@
   margin-top: 1.5rem;
   box-shadow: 0 0 15px var(--color-primary) 66;
 }
+
+.logoutButton {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  z-index: 1000;
+}

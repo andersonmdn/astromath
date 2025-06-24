@@ -1,4 +1,5 @@
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
+import { ToastContainer } from 'react-toastify'
 import './App.css'
 import ForgotPassword from './pages/ForgotPassword'
 import Game from './pages/Game'
@@ -9,6 +10,7 @@ import Register from './pages/Register'
 function App() {
   return (
     <Router>
+      <ToastContainer position="top-center" theme="dark" autoClose={3000} />
       <div className="App">
         <main className="App-main">
           <Routes>
