@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 import ICoordinates from '../../../types/ICoordinates'
 import { GameEvents } from '../GameEvents'
 import { loadAssets } from '../Scripts/Assets'
+import { log } from '../../../utils/logger'
 
 interface IPreparationRule {
   color: string
@@ -98,17 +99,17 @@ function canPlaceShip(
   const sameColorShips = coordinates.filter(
     coord => coord.ship && coord.type === color
   ).length
-  console.log('Quantidade de naves da mesma cor:', sameColorShips)
+  log('Quantidade de naves da mesma cor:', sameColorShips)
 
   // // Se houver algum vizinho de tipo diferente, não pode posicionar
   // if (differentTypeNeighbors.length > 0) {
-  //   console.log('Vizinho de tipo diferente')
+  //   log('Vizinho de tipo diferente')
   //   return false
   // }
 
   // Verifica a quantidade de vizinhos do mesmo tipo conforme a regra
   const count = sameTypeNeighbors.length
-  console.log('Vizinhos do mesmo tipo:', count)
+  log('Vizinhos do mesmo tipo:', count)
 
   switch (color) {
     case 'blue':

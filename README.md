@@ -4,6 +4,10 @@ A Phaser-based educational game built with React and Firebase.
 
 ## Setup
 
+Copy .env.example to .env and replace the placeholder values with your Firebase credentials before running the project.
+
+## Available Scripts
+
 1. Install [Node.js](https://nodejs.org/) (version 18 or higher is recommended).
 2. Install dependencies:
    ```bash

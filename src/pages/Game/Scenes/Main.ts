@@ -3,6 +3,7 @@ import Phase from '../../../enums/Phase'
 import { GameEvents } from '../GameEvents'
 import { loadAssets } from '../Scripts/Assets'
 import { createBackground } from '../Scripts/MainBackground'
+import { log } from '../../../utils/logger'
 
 export class Main extends Phaser.Scene {
   phase: Phase
@@ -36,20 +37,20 @@ export class Main extends Phaser.Scene {
 
     GameEvents.on('preparationEnd', () => {
       //Transmintir para para o Backend que a preparação acabou
-      console.log('Preparação finalizada')
+      log('Preparação finalizada')
     })
 
     this.add
       .image(width / 2, height / 2, 'button-attack')
       .setInteractive()
       .on('pointerdown', () => {
-        console.log('Botão de ataque pressionado')
+        log('Botão de ataque pressionado')
       })
   }
 
   updatePhase(newPhase: Phase) {
     this.phase = newPhase
-    console.log(`Fase alterada para: ${this.phase}`)
+    log(`Fase alterada para: ${this.phase}`)
   }
 
   update() {
