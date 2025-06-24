@@ -1,6 +1,7 @@
 import ICoordinates from '../../../types/ICoordinates'
 import { GameEvents } from '../GameEvents'
 import { loadAssets } from '../Scripts/Assets'
+import { log } from '../../../utils/logger'
 
 const angleTextFontConfig = {
   fontSize: '16px',
@@ -167,7 +168,7 @@ function placeAllyShip(scene: Board, coordinates: ICoordinates, type: string) {
 }
 
 function pointClick(scene: Board, circle: number, angle: number, type: string) {
-  console.log(type)
+  log(type)
 
   const coordinate =
     type === 'ally'
@@ -189,7 +190,7 @@ function pointClick(scene: Board, circle: number, angle: number, type: string) {
     tryPlaceAllyShip(scene, scene.coordinatesAlly, coordinate)
   }
 
-  console.log('Clicou no ponto', circle, angle, coordinate)
+  log('Clicou no ponto', circle, angle, coordinate)
 }
 
 export class Board extends Phaser.Scene {
