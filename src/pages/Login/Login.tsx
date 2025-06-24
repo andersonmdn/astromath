@@ -7,13 +7,7 @@ import styles from './Login.module.css'
 const Login = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [message, setMessage] = useState<{
-    text: string
-    type: 'success' | 'error' | ''
-  }>({
-    text: '',
-    type: '',
-  })
+  // Removed unused message state
   const navigate = useNavigate()
 
   const handleLogin = async () => {
@@ -108,15 +102,7 @@ const Login = () => {
           </small>
         </div>
       </div>
-      {message.text && (
-        <span
-          className={`${styles.message} ${
-            message.type === 'error' ? styles.error : styles.success
-          }`}
-        >
-          {message.text}
-        </span>
-      )}
+      {/* Removed unused message rendering */}
     </div>
   )
 }
