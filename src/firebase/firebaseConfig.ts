@@ -3,12 +3,13 @@ import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyDIuLpoHX9SVhXAoM9hHwNdRA9YIFG7ctU',
-  authDomain: 'astromath-51ed3.firebaseapp.com',
-  projectId: 'astromath-51ed3',
-  storageBucket: 'astromath-51ed3.firebasestorage.app',
-  messagingSenderId: '240936440046',
-  appId: '1:240936440046:web:3477de2cad9a4ade9923ff',
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY as string,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN as string,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID as string,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET as string,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID as string,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID as string,
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID as string,
 }
 
 // measurementId: "G-VELHDHMVZV"
