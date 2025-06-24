@@ -1,0 +1,15 @@
+@import './theme.css';
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-default);
+}
+
+button {
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+}

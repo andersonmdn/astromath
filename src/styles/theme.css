@@ -1,0 +1,18 @@
+:root {
+  --color-bg: #0e0d11;
+  --color-bg-panel: #1d1b22;
+  --color-border: #44475a;
+  --color-text: #f8f8f2;
+  --color-text-placeholder: #6272a4;
+  --color-input: #0e0d11;
+
+  --color-primary: #bd93f9;
+  --color-secondary: #6272a4;
+  --color-accent: #ff79c6;
+  --color-success: #50fa7b;
+  --color-danger: #ff5555;
+  --color-white: #ffffff;
+
+  --radius: 10px;
+  --font-default: monospace;
+}
