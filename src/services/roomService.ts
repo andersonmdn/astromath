@@ -11,17 +11,10 @@ import {
   where,
 } from 'firebase/firestore'
 import { db } from '../firebase/firebaseConfig'
-
-export type RoomData = {
-  name: string
-  type: 'public' | 'private'
-  password?: string
-  createdBy: string
-  players: string[]
-}
+import IRoom from '../types/IRoom'
 
 // Cria uma sala
-export const createRoom = async (roomData: RoomData) => {
+export const createRoom = async (roomData: IRoom) => {
   const docRef = await addDoc(collection(db, 'rooms'), {
     ...roomData,
     createdAt: new Date().toISOString(),
@@ -30,7 +23,7 @@ export const createRoom = async (roomData: RoomData) => {
 }
 export const editRoom = async (
   roomId: string,
-  updatedData: Partial<Omit<RoomData, 'createdBy'>>
+  updatedData: Partial<Omit<IRoom, 'createdBy'>>
 ) => {
   const roomRef = doc(db, 'rooms', roomId)
   await updateDoc(roomRef, updatedData)
@@ -49,21 +42,33 @@ export const getRoomById = async (roomId: string) => {
   return roomSnap.exists() ? { id: roomSnap.id, ...roomSnap.data() } : null
 }
 
+// Lista todas salas
+export const listAllRooms = async (): Promise<IRoom[]> => {
+  const querySnapshot = await getDocs(collection(db, 'rooms'))
+  return querySnapshot.docs.map(doc => ({
+    docId: doc.id,
+    ...doc.data(),
+  })) as IRoom[]
+}
+
 // Lista todas salas públicas
-export const listPublicRooms = async () => {
+export const listPublicRooms = async (): Promise<IRoom[]> => {
   const q = query(collection(db, 'rooms'), where('type', '==', 'public'))
   const querySnapshot = await getDocs(q)
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+  return querySnapshot.docs.map(doc => ({
+    docId: doc.id,
+    ...doc.data(),
+  })) as IRoom[]
 }
 
 // Escuta salas públicas em tempo real
-export const onPublicRoomsSnapshot = (callback: (rooms: any[]) => void) => {
+export const onPublicRoomsSnapshot = (callback: (rooms: IRoom[]) => void) => {
   const q = query(collection(db, 'rooms'), where('type', '==', 'public'))
   return onSnapshot(q, snapshot => {
     const rooms = snapshot.docs.map(doc => ({
-      id: doc.id,
+      docId: doc.id,
       ...doc.data(),
-    }))
+    })) as IRoom[]
     callback(rooms)
   })
 }

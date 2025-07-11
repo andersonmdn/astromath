@@ -1,25 +1,33 @@
-import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
-import { db } from '../firebase/firebaseConfig'
+import { useAuth } from '../context/AuthContext'
+import { listAllRooms } from '../services/roomService'
+import { getUserProfile } from '../services/userService'
 
 export const useRooms = () => {
   const [publicRooms, setPublicRooms] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const { user } = useAuth()
 
   useEffect(() => {
-    const q = query(collection(db, 'rooms'), where('type', '==', 'public'))
+    const fetchRooms = async () => {
+      const rooms = await listAllRooms()
 
-    const unsubscribe = onSnapshot(q, snapshot => {
-      const rooms = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
+      // Trocar o uID pelo nome do usuário
+      if (!user) {
+        setPublicRooms(rooms)
+        return
+      }
+
+      const userProfile = await getUserProfile(user.uid)
+
+      const roomsWithUsernames = rooms.map(room => ({
+        ...room,
+        createdBy: (userProfile && userProfile.username) || room.createdBy,
       }))
-      setPublicRooms(rooms)
-      setLoading(false)
-    })
+      setPublicRooms(roomsWithUsernames)
+    }
 
-    return () => unsubscribe()
-  }, [])
+    fetchRooms()
+  }, [user])
 
-  return { publicRooms, loading }
+  return { publicRooms }
 }

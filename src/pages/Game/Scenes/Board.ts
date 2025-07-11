@@ -1,205 +1,25 @@
 import ICoordinates from '../../../types/ICoordinates'
+import { log } from '../../../utils/logger'
 import { GameEvents } from '../GameEvents'
 import { loadAssets } from '../Scripts/Assets'
-import { log } from '../../../utils/logger'
 
-const angleTextFontConfig = {
+const angleLabelStyle = {
   fontSize: '16px',
   fontFamily: 'Lexend',
   fill: '#FFFFFF',
   align: 'center',
 }
 
-function drawBoard(
-  scene: Board, // Garantindo que `scene` tenha `coordinatesAlly`
-  width: number,
-  height: number,
-  color: string = '#282a36'
-) {
-  const graphics = {
-    ally: scene.add.graphics({ lineStyle: { width: 1, color: 0x50fa7b } }),
-    enemy: scene.add.graphics({ lineStyle: { width: 1, color: 0xff5555 } }),
-  }
-
-  const center = {
-    ally: { x: width / 4, y: height / 2 },
-    enemy: { x: (width * 3) / 4, y: height / 2 },
-  }
-
-  const radii = [100, 150, 200]
-  const extraLineLength = 35
-
-  radii.forEach((radius, index) => {
-    // Desenhando círculos
-    drawCircleGrid(graphics.ally, center.ally, radius)
-    drawCircleGrid(graphics.enemy, center.enemy, radius)
-
-    for (let angle = 0; angle < 360; angle += 30) {
-      const radians = Phaser.Math.DegToRad(angle)
-
-      // Calcula coordenadas para ambos os lados
-      const positions = {
-        ally: {
-          x: center.ally.x + Math.cos(radians) * radius,
-          y: center.ally.y + Math.sin(radians) * radius,
-        },
-        enemy: {
-          x: center.enemy.x + Math.cos(radians) * radius,
-          y: center.enemy.y + Math.sin(radians) * radius,
-        },
-      }
-
-      // Adiciona pontos ao `coordinatesAlly`
-      scene.coordinatesAlly.push({
-        circle: index + 1,
-        angle,
-        x: positions.ally.x,
-        y: positions.ally.y,
-        occupied: false,
-        ship: false,
-        type: 'empty',
-        alive: true,
-      })
-
-      // Adiciona pontos ao `coordinatesEnemy`
-      scene.coordinatesEnemy.push({
-        circle: index + 1,
-        angle,
-        x: positions.enemy.x,
-        y: positions.enemy.y,
-        occupied: false,
-        ship: false,
-        type: 'empty',
-        alive: true,
-      })
-
-      // Desenha linhas radiais apenas no último círculo
-      if (index === radii.length - 1) {
-        drawRadialLines(
-          graphics.ally,
-          center.ally,
-          radius,
-          extraLineLength,
-          radians
-        )
-        drawRadialLines(
-          graphics.enemy,
-          center.enemy,
-          radius,
-          extraLineLength,
-          radians
-        )
-      }
-
-      // Adiciona texto dos ângulos
-      if (index === 2) {
-        const xEnd =
-          center.ally.x + Math.cos(radians) * (radius + extraLineLength + 20)
-        const yEnd =
-          center.ally.y + Math.sin(radians) * (radius + extraLineLength + 20)
-        scene.add
-          .text(xEnd, yEnd, `${angle}°`, angleTextFontConfig)
-          .setOrigin(0.5)
-      }
-
-      // Criando pontos interativos
-      createInteractivePoint(scene, positions.ally, index + 1, angle, 'ally')
-      createInteractivePoint(scene, positions.enemy, index + 1, angle, 'enemy')
-    }
-  })
-}
-
-// 🔹 Função para desenhar círculos
-function drawCircleGrid(
-  graphics: Phaser.GameObjects.Graphics,
-  center: { x: number; y: number },
-  radius: number
-) {
-  graphics.strokeCircle(center.x, center.y, radius)
-}
-
-// 🔹 Função para desenhar linhas radiais
-function drawRadialLines(
-  graphics: Phaser.GameObjects.Graphics,
-  center: { x: number; y: number },
-  radius: number,
-  extraLength: number,
-  radians: number
-) {
-  const xEnd = center.x + Math.cos(radians) * (radius + extraLength)
-  const yEnd = center.y + Math.sin(radians) * (radius + extraLength)
-  graphics.lineBetween(center.x, center.y, xEnd, yEnd)
-}
-
-// 🔹 Função para criar pontos interativos
-function createInteractivePoint(
-  scene: Phaser.Scene,
-  position: { x: number; y: number },
-  circle: number,
-  angle: number,
-  type: string
-) {
-  const pointObject = scene.add
-    .zone(position.x, position.y, 45, 45)
-    .setInteractive()
-  scene.add.circle(position.x, position.y, 25, 0x00ff00).setAlpha(0.1)
-
-  pointObject.on('pointerdown', () =>
-    pointClick(scene as Board, circle, angle, type)
-  )
-}
-
-function tryPlaceAllyShip(
-  scene: Board,
-  coordinates: ICoordinates[],
-  coordinate: ICoordinates
-) {
-  if (coordinates) {
-    GameEvents.emit('tryPlaceShip', {
-      coordinates: coordinates,
-      circle: coordinate.circle,
-      angle: coordinate.angle,
-    })
-  }
-}
-
-function placeAllyShip(scene: Board, coordinates: ICoordinates, type: string) {
-  scene.add.image(coordinates.x, coordinates.y, `ship_${type}`).setScale(0.5)
-}
-
-function pointClick(scene: Board, circle: number, angle: number, type: string) {
-  log(type)
-
-  const coordinate =
-    type === 'ally'
-      ? scene.coordinatesAlly.find(
-          coord => coord.circle === circle && coord.angle === angle
-        )
-      : scene.coordinatesEnemy.find(
-          coord => coord.circle === circle && coord.angle === angle
-        )
-
-  // ;(scene as Board).gameStatus = 'attacking'
-
-  if (
-    coordinate &&
-    type === 'ally' &&
-    scene.gameStatus === 'setup' &&
-    !coordinate.occupied
-  ) {
-    tryPlaceAllyShip(scene, scene.coordinatesAlly, coordinate)
-  }
-
-  log('Clicou no ponto', circle, angle, coordinate)
-}
-
+/**
+ * Cena principal do tabuleiro do jogo Astromath
+ */
 export class Board extends Phaser.Scene {
   coordinatesAlly: ICoordinates[] = []
   coordinatesEnemy: ICoordinates[] = []
   gameStatus: 'setup' | 'attacking' | 'receiving attack' = 'setup'
 
   constructor() {
-    super({ key: 'SceneBoard', active: false }) // Garante que a cena tenha um identificador único
+    super({ key: 'SceneBoard', active: false })
   }
 
   preload() {
@@ -208,17 +28,16 @@ export class Board extends Phaser.Scene {
 
   create() {
     if (!this.add) {
-      console.error(
-        "Erro: 'this.add' está indefinido. Verifique a inicialização da cena."
-      )
+      console.error("Erro: 'this.add' está indefinido.")
       return
     }
 
     const width = Number(this.sys.game.config.width)
     const height = Number(this.sys.game.config.height)
 
-    drawBoard(this, width, height)
+    drawGameBoard(this, width, height)
 
+    // Evento disparado ao posicionar uma nave
     GameEvents.on(
       'placeShip',
       (data: { circle: number; angle: number; color: string }) => {
@@ -238,11 +57,209 @@ export class Board extends Phaser.Scene {
       }
     )
 
+    // Evento usado durante a fase de preparação do jogador
     GameEvents.on(
-      'placeAllyShipInSetupFase ',
+      'placeAllyShipInSetupFase',
       (data: { color: string; coordinates: ICoordinates }) => {
-        placeAllyShip(this, data.coordinates, data.color)
+        drawAllyShipImage(this, data.coordinates, data.color)
       }
     )
   }
+}
+
+/**
+ * Cria o tabuleiro com coordenadas, círculos, linhas e interações
+ */
+function drawGameBoard(
+  scene: Board,
+  width: number,
+  height: number,
+  backgroundColor: string = '#282a36'
+) {
+  const graphics = {
+    ally: scene.add.graphics({ lineStyle: { width: 1, color: 0x50fa7b } }),
+    enemy: scene.add.graphics({ lineStyle: { width: 1, color: 0xff5555 } }),
+  }
+
+  const center = {
+    ally: { x: width / 4, y: height / 2 },
+    enemy: { x: (width * 3) / 4, y: height / 2 },
+  }
+
+  const circleRadii = [100, 150, 200]
+  const radialExtension = 35
+
+  circleRadii.forEach((radius, index) => {
+    drawCircle(graphics.ally, center.ally, radius)
+    drawCircle(graphics.enemy, center.enemy, radius)
+
+    for (let angle = 0; angle < 360; angle += 30) {
+      const radians = Phaser.Math.DegToRad(angle)
+
+      const positions = {
+        ally: {
+          x: center.ally.x + Math.cos(radians) * radius,
+          y: center.ally.y + Math.sin(radians) * radius,
+        },
+        enemy: {
+          x: center.enemy.x + Math.cos(radians) * radius,
+          y: center.enemy.y + Math.sin(radians) * radius,
+        },
+      }
+
+      scene.coordinatesAlly.push({
+        circle: index + 1,
+        angle,
+        x: positions.ally.x,
+        y: positions.ally.y,
+        occupied: false,
+        ship: false,
+        type: 'empty',
+        alive: true,
+      })
+
+      scene.coordinatesEnemy.push({
+        circle: index + 1,
+        angle,
+        x: positions.enemy.x,
+        y: positions.enemy.y,
+        occupied: false,
+        ship: false,
+        type: 'empty',
+        alive: true,
+      })
+
+      if (index === circleRadii.length - 1) {
+        drawRadialLine(
+          graphics.ally,
+          center.ally,
+          radius,
+          radialExtension,
+          radians
+        )
+        drawRadialLine(
+          graphics.enemy,
+          center.enemy,
+          radius,
+          radialExtension,
+          radians
+        )
+      }
+
+      if (index === 2) {
+        const labelX =
+          center.ally.x + Math.cos(radians) * (radius + radialExtension + 20)
+        const labelY =
+          center.ally.y + Math.sin(radians) * (radius + radialExtension + 20)
+        scene.add
+          .text(labelX, labelY, `${angle}°`, angleLabelStyle)
+          .setOrigin(0.5)
+      }
+
+      addInteractivePoint(scene, positions.ally, index + 1, angle, 'ally')
+      addInteractivePoint(scene, positions.enemy, index + 1, angle, 'enemy')
+    }
+  })
+}
+
+/**
+ * Desenha um círculo no tabuleiro
+ */
+function drawCircle(
+  graphics: Phaser.GameObjects.Graphics,
+  center: { x: number; y: number },
+  radius: number
+) {
+  graphics.strokeCircle(center.x, center.y, radius)
+}
+
+/**
+ * Desenha uma linha radial a partir do centro do círculo
+ */
+function drawRadialLine(
+  graphics: Phaser.GameObjects.Graphics,
+  center: { x: number; y: number },
+  radius: number,
+  extraLength: number,
+  radians: number
+) {
+  const xEnd = center.x + Math.cos(radians) * (radius + extraLength)
+  const yEnd = center.y + Math.sin(radians) * (radius + extraLength)
+  graphics.lineBetween(center.x, center.y, xEnd, yEnd)
+}
+
+/**
+ * Adiciona zona interativa nos pontos do tabuleiro
+ */
+function addInteractivePoint(
+  scene: Phaser.Scene,
+  position: { x: number; y: number },
+  circle: number,
+  angle: number,
+  side: 'ally' | 'enemy'
+) {
+  const clickableZone = scene.add
+    .zone(position.x, position.y, 45, 45)
+    .setInteractive()
+  scene.add.circle(position.x, position.y, 25, 0x00ff00).setAlpha(0.1)
+
+  clickableZone.on('pointerdown', () =>
+    onGridPointClick(scene as Board, circle, angle, side)
+  )
+}
+
+/**
+ * Gerencia clique do jogador em uma célula do tabuleiro
+ */
+function onGridPointClick(
+  scene: Board,
+  circle: number,
+  angle: number,
+  side: string
+) {
+  const coordinate =
+    side === 'ally'
+      ? scene.coordinatesAlly.find(
+          c => c.circle === circle && c.angle === angle
+        )
+      : scene.coordinatesEnemy.find(
+          c => c.circle === circle && c.angle === angle
+        )
+
+  if (
+    coordinate &&
+    side === 'ally' &&
+    scene.gameStatus === 'setup' &&
+    !coordinate.occupied
+  ) {
+    emitTryPlaceShip(scene, scene.coordinatesAlly, coordinate)
+  }
+
+  log('Clicou no ponto', circle, angle, coordinate)
+}
+
+/**
+ * Emite evento para tentativa de posicionar uma nave
+ */
+function emitTryPlaceShip(
+  scene: Board,
+  coordinates: ICoordinates[],
+  coordinate: ICoordinates
+) {
+  GameEvents.emit('tryPlaceShip', {
+    coordinates,
+    circle: coordinate.circle,
+    angle: coordinate.angle,
+  })
+}
+
+/**
+ * Desenha visualmente a nave aliada no tabuleiro
+ */
+function drawAllyShipImage(
+  scene: Board,
+  coordinate: ICoordinates,
+  shipType: string
+) {
+  scene.add.image(coordinate.x, coordinate.y, `ship_${shipType}`).setScale(0.5)
 }

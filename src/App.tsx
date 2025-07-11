@@ -6,6 +6,7 @@ import Game from './pages/Game'
 import Lobby from './pages/Lobby'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import WaitingRoom from './pages/WaitingRoom'
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/lobby" element={<Lobby />} />
             <Route path="/game" element={<Game />} />
+            <Route path="/waiting-room/:roomId" element={<WaitingRoom />} />
             {/* <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} /> */}
           </Routes>

@@ -1,9 +1,11 @@
 .containerMain {
   background-color: var(--color-bg);
   min-height: 100vh;
-  color: var(--color-text);
-  font-family: var(--font-default);
   padding: 2rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .title {
@@ -13,28 +15,43 @@
   font-weight: bold;
 }
 
-.panel {
-  border-radius: 2rem;
-  background-color: var(--color-bg-panel);
-  padding: 2rem;
-}
-
 .sectionTitle {
   color: var(--color-primary);
   margin-bottom: 1rem;
+  text-align: center;
+}
+
+.panelInput {
+  border-radius: var(--panel-radius);
+  background-color: var(--color-bg-panel);
+  padding: 1rem;
 }
 
 .formInput {
-  background-color: var(--color-bg);
-  border: 1px solid var(--color-border);
+  background-color: var(--color-input);
+  border: 1px solid var(--color-input);
   color: var(--color-text);
-  border-radius: var(--radius);
+}
+
+.formInput::placeholder {
+  color: var(--color-text-placeholder);
+  opacity: 1;
+}
+
+.formInput:focus {
+  outline: none;
+  color: var(--color-white);
+  background-color: var(--color-input);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
 }
 
 .btnPrimary {
   background-color: var(--color-primary);
   color: var(--color-bg);
   border-radius: var(--radius);
+  padding: 0.5rem 1.2rem;
+  font-weight: bold;
 }
 
 .btnSecondary {
@@ -55,15 +72,69 @@
   background-color: var(--color-success);
   color: var(--color-bg);
   border-radius: var(--radius);
+  padding: 0.4rem 1rem;
+  font-weight: bold;
+}
+
+.cardPanel {
+  border: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  grid-column-gap: 15px;
+  grid-row-gap: 15px;
+}
+
+.cardTitle {
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: var(--color-text);
+  text-transform: capitalize;
+  margin-bottom: 0.5rem;
+}
+
+.roomImage {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 1rem;
 }
 
 .cardRoom {
-  border: 1px solid var(--color-primary);
   border-radius: var(--radius);
-  background-color: transparent;
-  color: var(--color-text);
-  padding: 0.5rem;
-  margin-bottom: 0.5rem;
+  border: 1px solid var(--color-bg);
+  background-color: var(--color-bg-panel);
+  padding: 1rem;
+  transition: all 0.3s ease-in-out;
+  cursor: pointer;
+}
+
+.cardRoom:hover {
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-bg-panel);
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background-color: var(--color-bg-panel);
+  padding: 2rem;
+  border-radius: var(--radius);
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 0 15px var(--color-primary);
 }
 
 .transitionBox {
@@ -91,4 +162,16 @@
   top: 20px;
   right: 30px;
   z-index: 1000;
+  border: 1px solid var(--color-danger);
+  color: var(--color-danger);
+  background-color: transparent;
+  padding: 0.3rem 0.75rem;
+  font-weight: bold;
+  border-radius: var(--radius);
+  transition: background 0.2s ease-in-out;
+}
+
+.logoutButton:hover {
+  background-color: var(--color-danger);
+  color: var(--color-bg);
 }
