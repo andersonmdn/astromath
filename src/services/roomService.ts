@@ -32,7 +32,12 @@ export const editRoom = async (
 // Remove uma sala
 export const deleteRoom = async (roomId: string) => {
   const roomRef = doc(db, 'rooms', roomId)
-  await deleteDoc(roomRef)
+  try {
+    await deleteDoc(roomRef)
+  } catch (error) {
+    console.error(`Failed to delete room with ID ${roomId}:`, error)
+    throw error
+  }
 }
 
 // Busca uma sala pelo ID
@@ -45,10 +50,12 @@ export const getRoomById = async (roomId: string) => {
 // Lista todas salas
 export const listAllRooms = async (): Promise<IRoom[]> => {
   const querySnapshot = await getDocs(collection(db, 'rooms'))
-  return querySnapshot.docs.map(doc => ({
-    docId: doc.id,
-    ...doc.data(),
-  })) as IRoom[]
+  return querySnapshot.docs.map(doc => {
+    return {
+      ...doc.data(),
+      docId: doc.id,
+    }
+  }) as IRoom[]
 }
 
 // Lista todas salas públicas
@@ -56,8 +63,8 @@ export const listPublicRooms = async (): Promise<IRoom[]> => {
   const q = query(collection(db, 'rooms'), where('type', '==', 'public'))
   const querySnapshot = await getDocs(q)
   return querySnapshot.docs.map(doc => ({
-    docId: doc.id,
     ...doc.data(),
+    docId: doc.id,
   })) as IRoom[]
 }
 
@@ -66,8 +73,8 @@ export const onPublicRoomsSnapshot = (callback: (rooms: IRoom[]) => void) => {
   const q = query(collection(db, 'rooms'), where('type', '==', 'public'))
   return onSnapshot(q, snapshot => {
     const rooms = snapshot.docs.map(doc => ({
-      docId: doc.id,
       ...doc.data(),
+      docId: doc.id,
     })) as IRoom[]
     callback(rooms)
   })

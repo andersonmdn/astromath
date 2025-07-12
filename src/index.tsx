@@ -8,8 +8,8 @@ import App from './App'
 import './index.css'
 import './styles/globals.css'
 
-// ⬇️ Importe o AuthProvider
 import { AuthProvider } from './context/AuthContext'
+import { SocketProvider } from './context/SocketContext'
 
 const container = document.getElementById('root')
 if (!container) {
@@ -21,7 +21,9 @@ const root = ReactDOM.createRoot(container)
 root.render(
   <React.StrictMode>
     <AuthProvider>
-      <App />
+      <SocketProvider>
+        <App />
+      </SocketProvider>
     </AuthProvider>
   </React.StrictMode>
 )

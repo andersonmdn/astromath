@@ -5,11 +5,11 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { useAuth } from '../../context/AuthContext'
+import { useSocket } from '../../context/SocketContext'
 import { db } from '../../firebase/firebaseConfig'
 import { useRooms } from '../../hooks/useRooms'
 import { logout } from '../../services/authService'
 import { createRoom } from '../../services/roomService'
-import { useSocket } from '../../services/socket'
 import styles from './Lobby.module.css'
 
 const Lobby = () => {
@@ -112,6 +112,8 @@ const Lobby = () => {
     room.name.toLowerCase().includes(search.toLowerCase())
   )
 
+  console.log('Public Rooms:', publicRooms)
+
   return (
     <div className={styles.containerMain}>
       <button
@@ -122,7 +124,8 @@ const Lobby = () => {
       </button>
 
       <h1 className={`${styles.title} fw-bold text-uppercase fs-3`}>
-        ASTROMATH
+        ASTROMATH{' '}
+        {user ? user.displayName || user.email || 'Visitante' : 'Visitante'}
       </h1>
 
       <div className={`container`}>
@@ -144,7 +147,7 @@ const Lobby = () => {
               onClick={() => {
                 setSelectedRoom(room)
                 if (room.password) setShowJoinModal(true)
-                else navigate(`/sala/${room.id}`)
+                else navigate(`/waiting-room/${room.docId}`)
               }}
             >
               <img
