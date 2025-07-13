@@ -110,18 +110,18 @@ function createClouds(scene: Phaser.Scene, width: number, height: number) {
 }
 
 function createBackground(scene: Phaser.Scene, width: number, height: number) {
-  const gradient = scene.add.graphics()
+  // const gradient = scene.add.graphics()
   const stars = scene.add.group()
 
-  // Cria um gradiente vertical (de azul escuro para preto)
-  gradient.fillGradientStyle(
-    0x000033, // Azul escuro (topo)
-    0x000000, // Preto (base)
-    1, // Alpha do topo
-    1 // Alpha da base
-  )
-
-  gradient.fillRect(0, 0, width, height) // Preenche a tela com o gradiente
+  // // Cria um gradiente vertical (de azul escuro para preto)
+  // gradient.fillGradientStyle(
+  //   0x000033, // Azul escuro (topo)
+  //   0x000000, // Preto (base)
+  //   1, // Alpha do topo
+  //   1 // Alpha da base
+  // )
+  scene.cameras.main.setBackgroundColor(0x0e0d11)
+  // gradient.fillRect(0, 0, width, height) // Preenche a tela com o gradiente
   createClouds(scene, width, height) // Adiciona nuvens ao fundo
   createStars(scene, stars, width, height) // Adiciona estrelas ao fundo
 }

@@ -1,9 +1,9 @@
 import Phaser from 'phaser'
 import Phase from '../../../enums/Phase'
+import { log } from '../../../utils/logger'
 import { GameEvents } from '../GameEvents'
 import { loadAssets } from '../Scripts/Assets'
 import { createBackground } from '../Scripts/MainBackground'
-import { log } from '../../../utils/logger'
 
 export class Main extends Phaser.Scene {
   phase: Phase

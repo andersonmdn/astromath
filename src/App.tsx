@@ -19,7 +19,7 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/lobby" element={<Lobby />} />
-            <Route path="/game" element={<Game />} />
+            <Route path="/game/:roomId" element={<Game />} />
             <Route path="/waiting-room/:roomId" element={<WaitingRoom />} />
             {/* <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} /> */}

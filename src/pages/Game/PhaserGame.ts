@@ -5,19 +5,12 @@ import { MainUI } from './Scenes/MainUI'
 import { Preparation } from './Scenes/Preparation'
 
 export const createGame = (parentId: string) => {
-  const parentElement = document.getElementById(parentId)
-  const margin = 8
-
   const gameConfig: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
-    width: parentElement
-      ? Math.max(800, parentElement.clientWidth) - margin
-      : 800,
-    height: parentElement
-      ? Math.max(600, parentElement.clientHeight) - margin
-      : 600,
+    width: window.innerWidth,
+    height: window.innerHeight,
     parent: parentId,
-    scene: [Main, MainUI, Board, Preparation], // Certifique-se de que a cena está sendo incluída
+    scene: [Main, MainUI, Board, Preparation],
   }
 
   return new Phaser.Game(gameConfig)

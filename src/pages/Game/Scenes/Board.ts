@@ -70,24 +70,25 @@ export class Board extends Phaser.Scene {
 /**
  * Cria o tabuleiro com coordenadas, círculos, linhas e interações
  */
-function drawGameBoard(
-  scene: Board,
-  width: number,
-  height: number,
-  backgroundColor: string = '#282a36'
-) {
+function drawGameBoard(scene: Board, width: number, height: number) {
+  const allyGroup = scene.add.group()
+  const enemyGroup = scene.add.group()
+
   const graphics = {
     ally: scene.add.graphics({ lineStyle: { width: 1, color: 0x50fa7b } }),
     enemy: scene.add.graphics({ lineStyle: { width: 1, color: 0xff5555 } }),
   }
 
+  allyGroup.add(graphics.ally)
+  enemyGroup.add(graphics.enemy)
+
   const center = {
-    ally: { x: width / 4, y: height / 2 },
-    enemy: { x: (width * 3) / 4, y: height / 2 },
+    ally: { x: width / 2, y: height / 2 },
+    enemy: { x: width / 2, y: height / 2 },
   }
 
-  const circleRadii = [100, 150, 200]
-  const radialExtension = 35
+  const circleRadii = [100, 150, 200] // Raio dos círculos do tabuleiro
+  const radialExtension = 35 // Extensão das linhas radiais
 
   circleRadii.forEach((radius, index) => {
     drawCircle(graphics.ally, center.ally, radius)
@@ -96,6 +97,7 @@ function drawGameBoard(
     for (let angle = 0; angle < 360; angle += 30) {
       const radians = Phaser.Math.DegToRad(angle)
 
+      // Calcula a posição do ponto no círculo
       const positions = {
         ally: {
           x: center.ally.x + Math.cos(radians) * radius,
@@ -156,10 +158,47 @@ function drawGameBoard(
           .setOrigin(0.5)
       }
 
-      addInteractivePoint(scene, positions.ally, index + 1, angle, 'ally')
-      addInteractivePoint(scene, positions.enemy, index + 1, angle, 'enemy')
+      const { clickableZone: allyClickableZone, circleZone: allyCircleZone } =
+        addInteractivePoint(scene, positions.ally, index + 1, angle, 'ally')
+
+      allyGroup.add(allyClickableZone)
+      allyGroup.add(allyCircleZone)
+
+      const { clickableZone: enemyClickableZone, circleZone: enemyCircleZone } =
+        addInteractivePoint(scene, positions.enemy, index + 1, angle, 'enemy')
+      enemyGroup.add(enemyClickableZone)
+      enemyGroup.add(enemyCircleZone)
     }
   })
+
+  allyGroup.setVisible(true)
+  enemyGroup.setVisible(false)
+
+  scene.add
+    .text(20, 60, 'Board Enemy', {
+      fontSize: '20px',
+      color: '#ffffff',
+      backgroundColor: '#771c1cff',
+      padding: { x: 10, y: 5 },
+    })
+    .setInteractive({ useHandCursor: true })
+    .on('pointerdown', () => {
+      allyGroup.setVisible(false)
+      enemyGroup.setVisible(true)
+    })
+
+  scene.add
+    .text(20, 20, 'Board Ally', {
+      fontSize: '20px',
+      color: '#ffffff',
+      backgroundColor: '#1f771cff',
+      padding: { x: 10, y: 5 },
+    })
+    .setInteractive({ useHandCursor: true })
+    .on('pointerdown', () => {
+      allyGroup.setVisible(true)
+      enemyGroup.setVisible(false)
+    })
 }
 
 /**
@@ -198,14 +237,20 @@ function addInteractivePoint(
   angle: number,
   side: 'ally' | 'enemy'
 ) {
+  const circleColor = side === 'ally' ? 0x00ff00 : 0xb94435
+
   const clickableZone = scene.add
     .zone(position.x, position.y, 45, 45)
     .setInteractive()
-  scene.add.circle(position.x, position.y, 25, 0x00ff00).setAlpha(0.1)
+  const circleZone = scene.add
+    .circle(position.x, position.y, 25, circleColor)
+    .setAlpha(0.1)
 
   clickableZone.on('pointerdown', () =>
     onGridPointClick(scene as Board, circle, angle, side)
   )
+
+  return { clickableZone, circleZone }
 }
 
 /**
