@@ -10,13 +10,14 @@ import { db } from '../../firebase/firebaseConfig'
 import { useRooms } from '../../hooks/useRooms'
 import { logout } from '../../services/authService'
 import { createRoom } from '../../services/roomService'
+import IRoom from '../../types/IRoom'
 import styles from './Lobby.module.css'
 
 const Lobby = () => {
   const [roomName, setRoomName] = useState('')
   const [password, setPassword] = useState('')
   const [search, setSearch] = useState('')
-  const [selectedRoom, setSelectedRoom] = useState<any>(null)
+  const [selectedRoom, setSelectedRoom] = useState<IRoom | null>(null)
   const [joinPassword, setJoinPassword] = useState('')
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showJoinModal, setShowJoinModal] = useState(false)

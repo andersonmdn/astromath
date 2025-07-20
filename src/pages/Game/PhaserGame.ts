@@ -1,6 +1,7 @@
 // frontend/src/pages/Game/PhaserGame.ts
 import Phaser from 'phaser'
 import { Socket } from 'socket.io-client'
+import { GameEvents } from './GameEvents'
 import { Main } from './Scenes/Main'
 import { MainUI } from './Scenes/MainUI'
 import { Preparation } from './Scenes/Preparation'
@@ -42,7 +43,12 @@ export const createGame = (
       userId: data.userId,
       roomId: data.roomId,
     })
-  }
 
-  return game
+    GameEvents.on('preparationEnd', () => {
+      console.log('Preparação concluída, iniciando o jogo...')
+      game.scene.stop('ScenePreparation')
+    })
+
+    return game
+  }
 }

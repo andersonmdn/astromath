@@ -1,9 +1,9 @@
 // frontend/src/pages/Game/Scenes/SceneBoard.ts
-import { toast } from 'react-toastify'
 import { Socket } from 'socket.io-client'
 import Board from '../../../types/Board'
 import { Spaceship } from '../../../types/Spaceship'
 import { log } from '../../../utils/logger'
+import { GameEvents } from '../GameEvents'
 import { loadAssets } from '../Scripts/Assets'
 import scenePreparationRules from './Preparation'
 
@@ -48,10 +48,8 @@ export class SceneBoard extends Phaser.Scene {
     const width = Number(this.sys.game.config.width)
     const height = Number(this.sys.game.config.height)
 
-    // Desenha o tabuleiro do jogo
     this.drawGameBoard(this, width, height)
 
-    const registerBoard = toast.success('Registrando tabuleiro...')
     console.log('Registrando tabuleiro...')
 
     this.socket.emit(
@@ -63,47 +61,42 @@ export class SceneBoard extends Phaser.Scene {
       },
       (response: { success: boolean; error?: string }) => {
         if (response.success) {
-          toast.update(registerBoard, {
-            render: 'Tabuleiro registrado com sucesso!',
-            type: 'success',
-            isLoading: false,
-            autoClose: 2000,
-          })
+          console.log('Tabuleiro registrado com sucesso!')
         } else {
-          toast.update(registerBoard, {
-            render: `Erro ao registrar tabuleiro: ${response.error}`,
-            type: 'error',
-            isLoading: false,
-            autoClose: 2000,
-          })
+          console.log(`Erro ao registrar tabuleiro: ${response.error}`)
         }
       }
     )
 
-    // // Evento disparado ao posicionar uma nave no tabuleiro
-    // GameEvents.on(
-    //   'placeShip',
-    //   (data: { circle: number; angle: number; color: string }) => {
-    //     // Verifica se o círculo e o ângulo existem nas coordenadas aliadas
-    //     const coordinate = this.coordinatesAlly.find(
-    //       coord => coord.circle === data.circle && coord.angle === data.angle
-    //     )
+    // Evento disparado ao posicionar uma nave no tabuleiro
+    GameEvents.on(
+      'placeShip',
+      (data: { circle: number; angle: number; color: string }) => {
+        const coordinate = this.coordinatesAlly.find(
+          coord => coord.circle === data.circle && coord.angle === data.angle
+        )
 
-    //     if (coordinate) {
-    //       this.add
-    //         .image(coordinate.x, coordinate.y, `ship_${data.color}`)
-    //         .setScale(0.5)
-    //       coordinate.occupant = {
-    //         alive: true,
-    //         color: data.color,
-    //       } as Spaceship
+        if (coordinate) {
+          const shipImage = this.animateShipArrival(
+            this, // Phaser.Scene
+            coordinate.x,
+            coordinate.y,
+            `ship_${data.color}`
+          )
 
-    //       const allyGroup = this.registry.get(
-    //         'allyGroup'
-    //       ) as Phaser.GameObjects.Group
-    //     }
-    //   }
-    // )
+          coordinate.occupant = {
+            alive: true,
+            color: data.color,
+          } as Spaceship
+
+          const allyGroup = this.registry.get(
+            'allyGroup'
+          ) as Phaser.GameObjects.Group
+
+          allyGroup.add(shipImage)
+        }
+      }
+    )
 
     // // Evento usado durante a fase de preparação do jogador
     // GameEvents.on(
@@ -112,6 +105,48 @@ export class SceneBoard extends Phaser.Scene {
     //     drawAllyShipImage(this, data.coordinates, data.color)
     //   }
     // )
+  }
+
+  animateShipArrival(
+    scene: Phaser.Scene,
+    targetX: number,
+    targetY: number,
+    textureKey: string,
+    startX?: number,
+    startY?: number
+  ): Phaser.GameObjects.Image {
+    // Ponto de entrada: fora da tela, à esquerda
+    startX =
+      startX !== undefined && startX !== null
+        ? startX
+        : Phaser.Math.Between(-200, -100)
+    // Ponto de entrada: posição aleatória verticalmente
+    startY =
+      startY !== undefined && startY !== null
+        ? startY
+        : Phaser.Math.Between(100, scene.scale.height - 100)
+
+    // Cria imagem da nave
+    const ship = scene.add.image(startX, startY, textureKey).setScale(0.5)
+
+    // Gira a nave na direção do movimento
+    const angle = Phaser.Math.Angle.Between(startX, startY, targetX, targetY)
+
+    ship.setRotation(angle + 4.5) // Ajusta para a orientação correta
+
+    // Anima ida até o destino
+    scene.tweens.add({
+      targets: ship,
+      x: targetX,
+      y: targetY,
+      ease: 'Sine.easeOut',
+      duration: 2000,
+      onComplete: () => {
+        ship.setRotation(0)
+      },
+    })
+
+    return ship
   }
 
   /**
@@ -126,6 +161,8 @@ export class SceneBoard extends Phaser.Scene {
    */
   emitTryPlaceShip(scene: SceneBoard, coordinates: Board[], coordinate: Board) {
     if (!this.socket) return
+    if (scenePreparationRules.length === 0) return
+
     const spaceshipColor = scenePreparationRules[0].color
 
     const spaceship: Spaceship = {
@@ -135,7 +172,7 @@ export class SceneBoard extends Phaser.Scene {
     }
 
     this.socket.emit(
-      'tryPlaceShip',
+      'tryLandingSpaceship',
       {
         roomId: this.roomId,
         playerId: this.userId,
@@ -145,15 +182,12 @@ export class SceneBoard extends Phaser.Scene {
       (response: { success: boolean; error?: string }) => {
         if (response.success) {
           log('Pouso autorizado:', coordinate)
-          toast.success('Pouso autorizado! Posicionando nave...')
-          // GameEvents.emit('placeShip', {
-          //   circle: coordinate.circle,
-          //   angle: coordinate.angle,
-          //   color: spaceshipColor, // Usando cor dinâmica
+          // toast.success('Pouso autorizado! Posicionando nave...', {
+          //   autoClose: 500,
           // })
         } else {
           log('Erro ao posicionar nave:', response.error)
-          toast.error(`Erro ao posicionar nave: ${response.error}`)
+          //toast.error(`Erro ao posicionar nave: ${response.error}`)
         }
       }
     )

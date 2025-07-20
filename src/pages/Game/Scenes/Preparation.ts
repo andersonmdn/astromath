@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 import { Socket } from 'socket.io-client'
 import Board from '../../../types/Board'
 import PreparationRule from '../../../types/PreparationRule'
+import { Spaceship } from '../../../types/Spaceship'
 import { log } from '../../../utils/logger'
 import { GameEvents } from '../GameEvents'
 import { loadAssets } from '../Scripts/Assets'
@@ -252,35 +253,28 @@ export class Preparation extends Phaser.Scene {
 
     drawPreparationRules(this, width)
 
-    GameEvents.on(
-      'tryPlaceShip',
-      (data: { coordinates: Board[]; circle: number; angle: number }) => {
+    this.socket.on(
+      'LandingSpaceship',
+      (data: { coordinate: Board; spaceship: Spaceship }) => {
         if (scenePreparationRules.length > 0) {
-          if (
-            canPlaceShip(
-              data.coordinates,
-              data.circle,
-              data.angle,
-              scenePreparationRules[0].color
-            )
-          ) {
-            GameEvents.emit('placeShip', {
-              circle: data.circle,
-              angle: data.angle,
-              color: scenePreparationRules[0].color,
-            })
+          GameEvents.emit('placeShip', {
+            circle: data.coordinate.circle,
+            angle: data.coordinate.angle,
+            color: scenePreparationRules[0].color,
+          })
 
-            scenePreparationRules[0].quantity--
-            this.shipGroup[scenePreparationRules[0].color].clear(true, true)
+          scenePreparationRules[0].quantity--
+          this.shipGroup[scenePreparationRules[0].color].clear(true, true)
 
-            if (scenePreparationRules[0].quantity === 0) {
-              scenePreparationRules.shift()
+          if (scenePreparationRules[0].quantity === 0) {
+            scenePreparationRules.shift()
+
+            if (scenePreparationRules.length === 0) {
+              GameEvents.emit('preparationEnd', {})
             }
-
-            drawPreparationRules(this, width)
           }
-        } else {
-          GameEvents.emit('preparationEnd', {})
+
+          drawPreparationRules(this, width)
         }
       }
     )
