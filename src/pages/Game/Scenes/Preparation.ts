@@ -1,19 +1,12 @@
 import Phaser from 'phaser'
-import ICoordinates from '../../../types/ICoordinates'
+import { Socket } from 'socket.io-client'
+import Board from '../../../types/Board'
+import PreparationRule from '../../../types/PreparationRule'
+import { log } from '../../../utils/logger'
 import { GameEvents } from '../GameEvents'
 import { loadAssets } from '../Scripts/Assets'
-import { log } from '../../../utils/logger'
 
-interface IPreparationRule {
-  color: string
-  name: string
-  description: string
-  need_neighbor: boolean
-  group: number
-  quantity: number
-}
-
-const scenePreparationRules: IPreparationRule[] = [
+const scenePreparationRules: PreparationRule[] = [
   {
     color: 'blue',
     name: 'Caça Leve (Interceptor)',
@@ -48,12 +41,14 @@ const scenePreparationRules: IPreparationRule[] = [
   },
 ]
 
+export default scenePreparationRules
+
 function getAdjacentCoordinates(
-  coordinates: ICoordinates[],
+  coordinates: Board[],
   circle: number,
   angle: number,
   allowAdjacentCircle: boolean = true
-): ICoordinates[] {
+): Board[] {
   return coordinates.filter(coord => {
     const adjustedAnglePlus = (angle + 30) % 360
     const adjustedAngleMinus = (angle - 30 + 360) % 360
@@ -74,7 +69,7 @@ function getAdjacentCoordinates(
 }
 
 function canPlaceShip(
-  coordinates: ICoordinates[],
+  coordinates: Board[],
   circle: number,
   angle: number,
   color: string
@@ -90,14 +85,24 @@ function canPlaceShip(
   if (!adjacent) return true
 
   const sameTypeNeighbors = adjacent.filter(
-    coord => coord.ship && coord.type === color
+    coord =>
+      coord.occupant &&
+      coord.occupant.type === 'Spaceship' &&
+      coord.occupant.color === color
   )
+  log('Vizinhos do mesmo tipo:', sameTypeNeighbors)
   const differentTypeNeighbors = adjacent.filter(
-    coord => coord.ship && coord.type !== color
+    coord =>
+      coord.occupant &&
+      coord.occupant.type === 'Spaceship' &&
+      coord.occupant.color !== color
   )
-
+  log('Vizinhos de tipo diferente:', differentTypeNeighbors)
   const sameColorShips = coordinates.filter(
-    coord => coord.ship && coord.type === color
+    coord =>
+      coord.occupant &&
+      coord.occupant.type === 'Spaceship' &&
+      coord.occupant.color === color
   ).length
   log('Quantidade de naves da mesma cor:', sameColorShips)
 
@@ -174,9 +179,18 @@ export class Preparation extends Phaser.Scene {
   shipName!: Phaser.GameObjects.Text
   shipDescription!: Phaser.GameObjects.Text
   shipGroup: Record<string, Phaser.GameObjects.Group> = {}
+  socket!: Socket
+  userId!: string
+  roomId!: string
 
   constructor() {
     super({ key: 'ScenePreparation', active: false }) // Garante que a cena tenha um identificador único
+  }
+
+  init(data: { socket: Socket; userId: string; roomId: string }) {
+    this.socket = data.socket
+    this.userId = data.userId
+    this.roomId = data.roomId
   }
 
   preload() {
@@ -230,11 +244,7 @@ export class Preparation extends Phaser.Scene {
 
     GameEvents.on(
       'tryPlaceShip',
-      (data: {
-        coordinates: ICoordinates[]
-        circle: number
-        angle: number
-      }) => {
+      (data: { coordinates: Board[]; circle: number; angle: number }) => {
         if (scenePreparationRules.length > 0) {
           if (
             canPlaceShip(
