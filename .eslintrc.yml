@@ -1,0 +1,23 @@
+root: true
+parser: '@typescript-eslint/parser'
+plugins:
+  - '@typescript-eslint'
+  - react
+  - prettier
+extends:
+  - eslint:recommended
+  - plugin:@typescript-eslint/recommended
+  - plugin:react/recommended
+  - plugin:prettier/recommended # <- ISSO AQUI É CRUCIAL
+rules:
+  prettier/prettier:
+    - error
+    - singleQuote: true
+      semi: false
+      trailingComma: es5
+      arrowParens: avoid
+  react/react-in-jsx-scope: off
+  react/prop-types: off
+settings:
+  react:
+    version: detect

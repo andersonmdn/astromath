@@ -32,7 +32,9 @@ export function useSocket(): Socket | null {
 
     newSocket.on('connect', () => {
       console.log('🧠 Conectado ao servidor Socket.IO:', newSocket.id)
-      localStorage.setItem('socketId', newSocket.id!)
+      if (newSocket.id) {
+        localStorage.setItem('socketId', newSocket.id)
+      }
     })
 
     socketRef.current = newSocket

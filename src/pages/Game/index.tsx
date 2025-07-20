@@ -1,3 +1,3 @@
-import { GameCanvas } from "./GameCanvas";
+import { GameCanvas } from './GameCanvas'
 
-export default GameCanvas;
+export default GameCanvas

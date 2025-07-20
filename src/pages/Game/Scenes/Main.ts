@@ -7,7 +7,7 @@ import { createBackground } from '../Scripts/MainBackground'
 
 export class Main extends Phaser.Scene {
   phase: Phase
-  preparationLaunched: boolean = false
+  preparationLaunched = false
 
   constructor() {
     super({ key: 'SceneMain', active: true })

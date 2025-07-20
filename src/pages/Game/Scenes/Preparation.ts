@@ -47,7 +47,7 @@ function getAdjacentCoordinates(
   coordinates: Board[],
   circle: number,
   angle: number,
-  allowAdjacentCircle: boolean = true
+  allowAdjacentCircle = true
 ): Board[] {
   return coordinates.filter(coord => {
     const adjustedAnglePlus = (angle + 30) % 360
@@ -68,6 +68,38 @@ function getAdjacentCoordinates(
   })
 }
 
+function canPlaceBlue(
+  sameTypeNeighbors: Board[],
+  differentTypeNeighbors: Board[]
+): boolean {
+  return sameTypeNeighbors.length === 0 && differentTypeNeighbors.length === 0
+}
+
+function canPlaceBlack(
+  sameTypeNeighbors: Board[],
+  sameColorShips: number
+): boolean {
+  return sameTypeNeighbors.length > 0 || sameColorShips === 0
+}
+
+function canPlaceRed(
+  sameTypeNeighbors: Board[],
+  sameColorShips: number
+): boolean {
+  return (
+    sameTypeNeighbors.length === 1 ||
+    sameColorShips === 0 ||
+    sameColorShips === 2
+  )
+}
+
+function canPlaceGreen(
+  sameTypeNeighbors: Board[],
+  sameColorShips: number
+): boolean {
+  return sameTypeNeighbors.length > 0 || sameColorShips === 0
+}
+
 function canPlaceShip(
   coordinates: Board[],
   circle: number,
@@ -81,7 +113,6 @@ function canPlaceShip(
     color === 'green' ? false : true
   )
 
-  // Filtrar vizinhos que já possuem uma nave
   if (!adjacent) return true
 
   const sameTypeNeighbors = adjacent.filter(
@@ -106,39 +137,18 @@ function canPlaceShip(
   ).length
   log('Quantidade de naves da mesma cor:', sameColorShips)
 
-  // // Se houver algum vizinho de tipo diferente, não pode posicionar
-  // if (differentTypeNeighbors.length > 0) {
-  //   log('Vizinho de tipo diferente')
-  //   return false
-  // }
-
-  // Verifica a quantidade de vizinhos do mesmo tipo conforme a regra
   const count = sameTypeNeighbors.length
   log('Vizinhos do mesmo tipo:', count)
 
   switch (color) {
     case 'blue':
-      return (
-        sameTypeNeighbors.length === 0 && differentTypeNeighbors.length === 0
-      )
+      return canPlaceBlue(sameTypeNeighbors, differentTypeNeighbors)
     case 'black':
-      return (
-        sameTypeNeighbors.length > 0 || sameColorShips === 0 /*&&
-        differentTypeNeighbors.length === 0*/
-      )
+      return canPlaceBlack(sameTypeNeighbors, sameColorShips)
     case 'red':
-      return (
-        sameTypeNeighbors.length === 1 ||
-        sameColorShips === 0 ||
-        sameColorShips === 2
-      ) /*&&
-      differentTypeNeighbors.length === 0*/
-
+      return canPlaceRed(sameTypeNeighbors, sameColorShips)
     case 'green':
-      return (
-        sameTypeNeighbors.length > 0 || sameColorShips === 0 /*&&
-        differentTypeNeighbors.length === 0*/
-      )
+      return canPlaceGreen(sameTypeNeighbors, sameColorShips)
     default:
       return false
   }

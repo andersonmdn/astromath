@@ -50,10 +50,10 @@ export const getRoomById = async (roomId: string) => {
 // Lista todas salas
 export const listAllRooms = async (): Promise<IRoom[]> => {
   const querySnapshot = await getDocs(collection(db, 'rooms'))
-  return querySnapshot.docs.map(doc => {
+  return querySnapshot.docs.map(document => {
     return {
-      ...doc.data(),
-      docId: doc.id,
+      ...document.data(),
+      docId: document.id,
     }
   }) as IRoom[]
 }
@@ -62,9 +62,9 @@ export const listAllRooms = async (): Promise<IRoom[]> => {
 export const listPublicRooms = async (): Promise<IRoom[]> => {
   const q = query(collection(db, 'rooms'), where('type', '==', 'public'))
   const querySnapshot = await getDocs(q)
-  return querySnapshot.docs.map(doc => ({
-    ...doc.data(),
-    docId: doc.id,
+  return querySnapshot.docs.map(document => ({
+    ...document.data(),
+    docId: document.id,
   })) as IRoom[]
 }
 
@@ -72,9 +72,9 @@ export const listPublicRooms = async (): Promise<IRoom[]> => {
 export const onPublicRoomsSnapshot = (callback: (rooms: IRoom[]) => void) => {
   const q = query(collection(db, 'rooms'), where('type', '==', 'public'))
   return onSnapshot(q, snapshot => {
-    const rooms = snapshot.docs.map(doc => ({
-      ...doc.data(),
-      docId: doc.id,
+    const rooms = snapshot.docs.map(document => ({
+      ...document.data(),
+      docId: document.id,
     })) as IRoom[]
     callback(rooms)
   })
