@@ -98,6 +98,8 @@ export class SceneBoard extends Phaser.Scene {
       }
     )
 
+    this.sessionRecover()
+
     // // Evento usado durante a fase de preparação do jogador
     // GameEvents.on(
     //   'placeAllyShipInSetupFase',
@@ -105,6 +107,27 @@ export class SceneBoard extends Phaser.Scene {
     //     drawAllyShipImage(this, data.coordinates, data.color)
     //   }
     // )
+  }
+
+  sessionRecover() {
+    this.socket.on('sessionRecover', ({ board }: { board: Board[] }) => {
+      this.coordinatesAlly = board
+
+      this.coordinatesAlly.forEach(coordinate => {
+        if (coordinate.occupant && coordinate.occupant.type === 'Spaceship') {
+          GameEvents.emit('placeShip', {
+            circle: coordinate.circle,
+            angle: coordinate.angle,
+            color:
+              coordinate.occupant && coordinate.occupant.type === 'Spaceship'
+                ? coordinate.occupant.color
+                : null,
+          })
+        }
+      })
+
+      GameEvents.emit('preparationEnd', {})
+    })
   }
 
   animateShipArrival(
@@ -119,12 +142,12 @@ export class SceneBoard extends Phaser.Scene {
     startX =
       startX !== undefined && startX !== null
         ? startX
-        : Phaser.Math.Between(-200, -100)
+        : Phaser.Math.Between(-100, scene.scale.width - 100)
     // Ponto de entrada: posição aleatória verticalmente
     startY =
       startY !== undefined && startY !== null
         ? startY
-        : Phaser.Math.Between(100, scene.scale.height - 100)
+        : Phaser.Math.Between(-100, scene.scale.height - 100)
 
     // Cria imagem da nave
     const ship = scene.add.image(startX, startY, textureKey).setScale(0.5)
