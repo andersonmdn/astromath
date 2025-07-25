@@ -55,9 +55,9 @@ const Assets: IAssets = {
 function loadAssets(scene: Phaser.Scene) {
   scene.load.setCORS('anonymous')
 
-  Object.entries(Assets.images).forEach(([key, path]) =>
+  Object.entries(Assets.images).forEach(([key, path]) => {
     scene.load.image(key, path)
-  )
+  })
   Object.entries(Assets.spritesheets).forEach(([key, { path, frameConfig }]) =>
     scene.load.spritesheet(key, path, frameConfig)
   )

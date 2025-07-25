@@ -4,8 +4,7 @@ import Board from '../../../types/Board'
 import { Spaceship } from '../../../types/Spaceship'
 import { log } from '../../../utils/logger'
 import { GameEvents } from '../GameEvents'
-import { loadAssets } from '../Scripts/Assets'
-import scenePreparationRules from './Preparation'
+import scenePreparationRules, { Preparation } from './Preparation'
 
 const angleLabelStyle = {
   fontSize: '16px',
@@ -33,10 +32,6 @@ export class SceneBoard extends Phaser.Scene {
     this.socket = data.socket
     this.userId = data.userId
     this.roomId = data.roomId
-  }
-
-  preload() {
-    loadAssets(this)
   }
 
   create() {
@@ -99,19 +94,20 @@ export class SceneBoard extends Phaser.Scene {
     )
 
     this.sessionRecover()
-
-    // // Evento usado durante a fase de preparação do jogador
-    // GameEvents.on(
-    //   'placeAllyShipInSetupFase',
-    //   (data: { color: string; coordinates: Board }) => {
-    //     drawAllyShipImage(this, data.coordinates, data.color)
-    //   }
-    // )
   }
 
   sessionRecover() {
-    this.socket.on('sessionRecover', ({ board }: { board: Board[] }) => {
-      this.coordinatesAlly = board
+    this.socket.off('sessionRecover')
+    this.socket.once('sessionRecover', ({ board }: { board: Board[] }) => {
+      console.log('Recuperando sessão do tabuleiro...')
+      board.forEach(({ circle, angle, occupant }) => {
+        const coord = this.coordinatesAlly.find(
+          c => c.circle === circle && c.angle === angle
+        )
+        if (coord) {
+          coord.occupant = occupant
+        }
+      })
 
       this.coordinatesAlly.forEach(coordinate => {
         if (coordinate.occupant && coordinate.occupant.type === 'Spaceship') {
@@ -123,10 +119,19 @@ export class SceneBoard extends Phaser.Scene {
                 ? coordinate.occupant.color
                 : null,
           })
+
+          const prepScene = this.scene.get('ScenePreparation') as Preparation
+          prepScene.placeShip(
+            coordinate.circle,
+            coordinate.angle,
+            coordinate.occupant.color
+          )
         }
       })
 
-      GameEvents.emit('preparationEnd', {})
+      if (scenePreparationRules.length === 0) {
+        GameEvents.emit('preparationEnd', {})
+      }
     })
   }
 

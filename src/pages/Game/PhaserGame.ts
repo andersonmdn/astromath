@@ -14,7 +14,7 @@ export const createGame = (
     userId: string
     roomId: string
   }
-) => {
+): Phaser.Game | undefined => {
   const gameConfig: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     width: window.innerWidth,

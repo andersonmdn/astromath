@@ -1,5 +1,5 @@
 // frontend/src/pages/Game/GameCanvas.tsx
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useSocket } from '../../context/SocketContext'
@@ -11,19 +11,26 @@ export const GameCanvas = () => {
   const { user } = useAuth()
   const { roomId } = useParams<{ roomId: string }>()
 
-  useEffect(() => {
-    if (!socket) return
+  const gameRef = useRef<Phaser.Game | null>(null)
 
-    if (!user || !user.uid || !roomId) return
+  useEffect(() => {
+    if (!socket || !user || !user.uid || !roomId) return
+    if (gameRef.current) return
+    console.log('Criando o jogo...')
 
     const game = createGame('game-container', {
       socket,
       userId: user.uid,
       roomId,
-    })
+    }) as Phaser.Game
+
+    gameRef.current = game
 
     return () => {
-      game.destroy(true)
+      if (game) {
+        game.destroy(true)
+      }
+      gameRef.current = null
     }
   }, [socket, user, roomId])
 

@@ -5,7 +5,6 @@ import PreparationRule from '../../../types/PreparationRule'
 import { Spaceship } from '../../../types/Spaceship'
 import { log } from '../../../utils/logger'
 import { GameEvents } from '../GameEvents'
-import { loadAssets } from '../Scripts/Assets'
 
 const scenePreparationRules: PreparationRule[] = [
   {
@@ -155,37 +154,6 @@ function canPlaceShip(
   }
 }
 
-function drawPreparationRules(scene: Preparation, width: number) {
-  let previousColor: string | null = null
-
-  scenePreparationRules.forEach(preparation => {
-    if (previousColor && preparation.color !== previousColor) {
-      return
-    }
-
-    scene.shipName.text = preparation.name
-    scene.shipDescription.text = preparation.description
-
-    const centerX = width / 2 // Centro da tela
-    const spacing = 60 // Distância entre as naves
-    const totalShips = preparation.quantity
-
-    for (let i = 0; i < totalShips; i++) {
-      // Calcula a posição X garantindo distribuição simétrica
-      const offset = (i - (totalShips - 1) / 2) * spacing
-      const x = centerX + offset
-
-      const ship = scene.add
-        .image(x, 130, `ship_${preparation.color}`)
-        .setScale(0.5)
-
-      scene.shipGroup[preparation.color].add(ship)
-    }
-
-    previousColor = preparation.color
-  })
-}
-
 export class Preparation extends Phaser.Scene {
   shipName!: Phaser.GameObjects.Text
   shipDescription!: Phaser.GameObjects.Text
@@ -193,6 +161,7 @@ export class Preparation extends Phaser.Scene {
   socket!: Socket
   userId!: string
   roomId!: string
+  width!: number
 
   constructor() {
     super({ key: 'ScenePreparation', active: false }) // Garante que a cena tenha um identificador único
@@ -204,10 +173,6 @@ export class Preparation extends Phaser.Scene {
     this.roomId = data.roomId
   }
 
-  preload() {
-    loadAssets(this)
-  }
-
   create() {
     if (!this.add) {
       console.error(
@@ -217,7 +182,7 @@ export class Preparation extends Phaser.Scene {
     }
 
     //Background
-    const width = Number(this.sys.game.config.width)
+    this.width = Number(this.sys.game.config.width)
     // const height = Number(this.sys.game.config.height)
 
     scenePreparationRules.forEach(rule => {
@@ -225,7 +190,7 @@ export class Preparation extends Phaser.Scene {
     })
 
     this.add
-      .text(width / 2, 20, 'Preparação', {
+      .text(this.width / 2, 20, 'Preparação', {
         fontSize: '25px',
         color: '#FFB86C',
         align: 'center',
@@ -234,7 +199,7 @@ export class Preparation extends Phaser.Scene {
       .setOrigin(0.5)
 
     this.shipName = this.add
-      .text(width / 2, 50, '', {
+      .text(this.width / 2, 50, '', {
         fontSize: '20px',
         color: '#FFB86C',
         align: 'center',
@@ -243,7 +208,7 @@ export class Preparation extends Phaser.Scene {
       .setOrigin(0.5)
 
     this.shipDescription = this.add
-      .text(width / 2, 80, '', {
+      .text(this.width / 2, 80, '', {
         fontSize: '20px',
         color: '#FFB86C',
         align: 'center',
@@ -251,36 +216,71 @@ export class Preparation extends Phaser.Scene {
       })
       .setOrigin(0.5)
 
-    drawPreparationRules(this, width)
+    this.drawPreparationRules(this)
 
     this.socket.on(
       'LandingSpaceship',
       (data: { coordinate: Board; spaceship: Spaceship }) => {
-        if (scenePreparationRules.length > 0) {
-          GameEvents.emit('placeShip', {
-            circle: data.coordinate.circle,
-            angle: data.coordinate.angle,
-            color: scenePreparationRules[0].color,
-          })
-
-          scenePreparationRules[0].quantity--
-          this.shipGroup[scenePreparationRules[0].color].clear(true, true)
-
-          if (scenePreparationRules[0].quantity === 0) {
-            scenePreparationRules.shift()
-
-            if (scenePreparationRules.length === 0) {
-              GameEvents.emit('preparationEnd', {})
-            }
-          }
-
-          drawPreparationRules(this, width)
-        }
+        this.placeShip(
+          data.coordinate.circle,
+          data.coordinate.angle,
+          data.spaceship.color
+        )
       }
     )
   }
 
-  update() {
-    // scene.shipGroup[preparation.color].
+  placeShip(circle: number, angle: number, color: string) {
+    if (scenePreparationRules.length > 0) {
+      GameEvents.emit('placeShip', {
+        circle: circle,
+        angle: angle,
+        color: color,
+      })
+
+      scenePreparationRules[0].quantity--
+      this.shipGroup[scenePreparationRules[0].color].clear(true, true)
+
+      if (scenePreparationRules[0].quantity === 0) {
+        scenePreparationRules.shift()
+
+        if (scenePreparationRules.length === 0) {
+          GameEvents.emit('preparationEnd', {})
+        }
+      }
+
+      this.drawPreparationRules(this)
+    }
+  }
+
+  drawPreparationRules(scene: Preparation) {
+    let previousColor: string | null = null
+
+    scenePreparationRules.forEach(preparation => {
+      if (previousColor && preparation.color !== previousColor) {
+        return
+      }
+
+      scene.shipName.text = preparation.name
+      scene.shipDescription.text = preparation.description
+
+      const centerX = this.width / 2 // Centro da tela
+      const spacing = 60 // Distância entre as naves
+      const totalShips = preparation.quantity
+
+      for (let i = 0; i < totalShips; i++) {
+        // Calcula a posição X garantindo distribuição simétrica
+        const offset = (i - (totalShips - 1) / 2) * spacing
+        const x = centerX + offset
+
+        const ship = scene.add
+          .image(x, 130, `ship_${preparation.color}`)
+          .setScale(0.5)
+
+        scene.shipGroup[preparation.color].add(ship)
+      }
+
+      previousColor = preparation.color
+    })
   }
 }

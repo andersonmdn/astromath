@@ -1,5 +1,4 @@
 import { GameEvents } from '../GameEvents'
-import { loadAssets } from '../Scripts/Assets'
 
 const fontConfigAlly = {
   fontSize: '20px',
@@ -86,10 +85,6 @@ export class MainUI extends Phaser.Scene {
     if (config) {
       this.customData = config // Guarda os dados
     }
-  }
-
-  preload() {
-    loadAssets(this)
   }
 
   create() {
