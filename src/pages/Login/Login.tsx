@@ -1,9 +1,15 @@
+// src/pages/Login/Login.tsx
+import { useRef } from 'react'
 import { Link } from 'react-router-dom'
+import { Button } from '../../components/ui/Button/Button'
 import { useLoginForm } from '../../hooks/useLoginForm'
 import styles from './Login.module.css'
 
 const Login = () => {
-  const { email, password, setEmail, setPassword, handleLogin } = useLoginForm()
+  const emailRef = useRef<HTMLInputElement | null>(null)
+  const passwordRef = useRef<HTMLInputElement | null>(null)
+  const { email, password, setEmailInput, setPasswordInput, handleLogin } =
+    useLoginForm(emailRef, passwordRef)
 
   return (
     <div className={styles.loginPage}>
@@ -22,7 +28,8 @@ const Login = () => {
             className={`form-control ${styles.inputField}`}
             placeholder="Digite seu email"
             value={email}
-            onChange={e => setEmail(e.target.value)}
+            onChange={e => setEmailInput(e.target.value)}
+            ref={emailRef}
           />
         </div>
 
@@ -36,18 +43,16 @@ const Login = () => {
             className={`form-control ${styles.inputField}`}
             placeholder="Digite sua senha"
             value={password}
-            onChange={e => setPassword(e.target.value)}
+            onChange={e => setPasswordInput(e.target.value)}
+            ref={passwordRef}
           />
         </div>
 
-        <button
-          className={`btn w-100 mb-3 ${styles.btnLogin}`}
-          onClick={handleLogin}
-        >
+        <Button fullWidth={true} onClick={handleLogin}>
           Entrar
-        </button>
+        </Button>
 
-        <div className="text-center">
+        <div className="text-center pt-2">
           <small>
             <Link to="/forgot-password" className={styles.forgotLink}>
               Esqueceu a senha?

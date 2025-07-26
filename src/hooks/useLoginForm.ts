@@ -9,10 +9,25 @@ import { Password } from '../entities/Password'
 import { login } from '../services/authService'
 import { UseLoginFormReturn } from '../types/hooks/useLoginForm.types'
 
-export const useLoginForm = (): UseLoginFormReturn => {
-  const [email, setEmail] = useState<Email | null>(null)
-  const [password, setPassword] = useState<Password | null>(null)
+export const useLoginForm = (
+  emailRef: React.RefObject<HTMLInputElement | null>,
+  passwordRef: React.RefObject<HTMLInputElement | null>
+): UseLoginFormReturn => {
+  const [emailInput, setEmailInput] = useState('')
+  const [passwordInput, setPasswordInput] = useState('')
   const navigate = useNavigate()
+
+  const focusEmailInput = () => {
+    if (emailRef && emailRef.current) {
+      emailRef.current.focus()
+    }
+  }
+
+  const focusPasswordInput = () => {
+    if (passwordRef && passwordRef.current) {
+      passwordRef.current.focus()
+    }
+  }
 
   const handleFirebaseAuthError = (error: FirebaseError) => {
     toast.error(
@@ -26,8 +41,22 @@ export const useLoginForm = (): UseLoginFormReturn => {
   }
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      toast.error('Por favor, informe email e senha válidos.')
+    let email: Email
+    let password: Password
+
+    try {
+      email = new Email(emailInput)
+    } catch {
+      toast.error('Email inválido.')
+      focusEmailInput()
+      return
+    }
+
+    try {
+      password = new Password(passwordInput)
+    } catch {
+      toast.error('Senha inválida.')
+      focusPasswordInput()
       return
     }
 
@@ -44,22 +73,10 @@ export const useLoginForm = (): UseLoginFormReturn => {
   }
 
   return {
-    email: email ? email.getValue() : '',
-    password: password ? password.getValue() : '',
-    setEmail: value => {
-      try {
-        setEmail(new Email(value))
-      } catch {
-        setEmail(null)
-      }
-    },
-    setPassword: value => {
-      try {
-        setPassword(new Password(value))
-      } catch {
-        setPassword(null)
-      }
-    },
+    email: emailInput,
+    password: passwordInput,
+    setEmailInput,
+    setPasswordInput,
     handleLogin,
   }
 }
