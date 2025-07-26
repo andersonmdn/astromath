@@ -1,120 +1,73 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { signUp } from '../../services/authService'
-import { createUserProfile } from '../../services/userService'
+import { useRef } from 'react'
+import { Link } from 'react-router-dom'
+import { useRegisterForm } from '../../hooks/useRegisterForm'
 import styles from './Register.module.css'
-// Add Firestore imports
 
 const Register = () => {
-  const [email, setEmail] = useState('')
-  const [username, setUsername] = useState('')
-  const [birthday, setBirthday] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const navigate = useNavigate()
+  const emailRef = useRef<HTMLInputElement | null>(null)
+  const passwordRef = useRef<HTMLInputElement | null>(null)
+  const confirmPasswordRef = useRef<HTMLInputElement | null>(null)
 
-  const handleRegister = async () => {
-    try {
-      if (password !== confirmPassword) {
-        alert('As senhas não coincidem.')
-        return
-      }
-
-      const userCredential = await signUp(email, password)
-      const uid = userCredential.user.uid
-
-      try {
-        await createUserProfile(uid, email, username, birthday)
-        alert('Conta criada com sucesso!')
-        navigate('/')
-      } catch (error: any) {
-        if (
-          error.code === 'permission-denied' ||
-          (error.message &&
-            error.message.includes('Missing or insufficient permissions'))
-        ) {
-          await userCredential.user.delete()
-          console.error('Erro de permissão ao criar perfil:', error)
-          alert('Erro de permissão ao criar perfil. Cadastro cancelado.')
-        } else {
-          alert('Erro ao criar perfil: ' + error.message)
-        }
-      }
-    } catch (error: any) {
-      console.error(error)
-      if (error.code === 'auth/email-already-in-use') {
-        alert('Este email já está em uso. Por favor, use outro email.')
-      } else if (error.code === 'auth/invalid-email') {
-        alert('Email inválido. Por favor, verifique o formato do email.')
-      } else if (error.code === 'auth/weak-password') {
-        alert('A senha deve ter pelo menos 6 caracteres.')
-      } else {
-        alert('Erro ao criar conta: ' + error.message)
-      }
-    }
-  }
+  const {
+    emailInput,
+    username,
+    birthday,
+    passwordInput,
+    confirmPassword,
+    setEmailInput,
+    setUsername,
+    setBirthday,
+    setPasswordInput,
+    setConfirmPassword,
+    handleRegister,
+  } = useRegisterForm(emailRef, passwordRef, confirmPasswordRef)
 
   return (
     <div className={styles.container}>
       <div className={styles.card}>
         <h2 className={styles.title}>Criar Conta</h2>
 
-        {/* Username input */}
-        <div className="mb-3">
-          <label className="form-label">Nome de usuário</label>
-          <input
-            type="text"
-            className={`form-control ${styles.input}`}
-            value={username}
-            onChange={e => setUsername(e.target.value)}
-            placeholder="Digite seu nome de usuário"
-          />
-        </div>
+        <FormGroup
+          label="Nome de usuário"
+          value={username}
+          onChange={setUsername}
+          placeholder="Digite seu nome de usuário"
+        />
 
-        {/* Birthday input */}
-        <div className="mb-3">
-          <label className="form-label">Data de nascimento</label>
-          <input
-            type="date"
-            className={`form-control ${styles.input}`}
-            value={birthday}
-            onChange={e => setBirthday(e.target.value)}
-            placeholder="Selecione sua data de nascimento"
-          />
-        </div>
+        <FormGroup
+          label="Data de nascimento"
+          type="date"
+          value={birthday}
+          onChange={setBirthday}
+          placeholder="Selecione sua data de nascimento"
+        />
 
-        <div className="mb-3">
-          <label className="form-label">Email</label>
-          <input
-            type="email"
-            className={`form-control ${styles.input}`}
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            placeholder="Digite seu email"
-          />
-        </div>
+        <FormGroup
+          label="Email"
+          type="email"
+          value={emailInput}
+          onChange={setEmailInput}
+          placeholder="Digite seu email"
+          inputRef={emailRef}
+        />
 
-        <div className="mb-3">
-          <label className="form-label">Senha</label>
-          <input
-            type="password"
-            className={`form-control ${styles.input}`}
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            placeholder="Digite sua senha"
-          />
-        </div>
+        <FormGroup
+          label="Senha"
+          type="password"
+          value={passwordInput}
+          onChange={setPasswordInput}
+          placeholder="Digite sua senha"
+          inputRef={passwordRef}
+        />
 
-        <div className="mb-3">
-          <label className="form-label">Confirmar Senha</label>
-          <input
-            type="password"
-            className={`form-control ${styles.input}`}
-            value={confirmPassword}
-            onChange={e => setConfirmPassword(e.target.value)}
-            placeholder="Confirme sua senha"
-          />
-        </div>
+        <FormGroup
+          label="Confirmar Senha"
+          type="password"
+          value={confirmPassword}
+          onChange={setConfirmPassword}
+          placeholder="Confirme sua senha"
+          inputRef={confirmPasswordRef}
+        />
 
         <button
           className={`btn w-100 ${styles.button}`}
@@ -126,14 +79,42 @@ const Register = () => {
         <div className="text-center mt-3">
           <small>
             Já tem uma conta?{' '}
-            <a href="/" className={styles.link}>
+            <Link to="/" className={styles.link}>
               Entrar
-            </a>
+            </Link>
           </small>
         </div>
       </div>
     </div>
   )
 }
+
+const FormGroup = ({
+  label,
+  type = 'text',
+  value,
+  onChange,
+  placeholder,
+  inputRef,
+}: {
+  label: string
+  type?: string
+  value: string
+  onChange: (v: string) => void
+  placeholder: string
+  inputRef?: React.RefObject<HTMLInputElement | null>
+}) => (
+  <div className="mb-3">
+    <label className="form-label">{label}</label>
+    <input
+      type={type}
+      className={`form-control ${styles.input}`}
+      value={value}
+      onChange={e => onChange(e.target.value)}
+      placeholder={placeholder}
+      ref={inputRef}
+    />
+  </div>
+)
 
 export default Register

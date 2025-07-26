@@ -1,41 +1,9 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify'
-import { login } from '../../services/authService'
+import { Link } from 'react-router-dom'
+import { useLoginForm } from '../../hooks/useLoginForm'
 import styles from './Login.module.css'
 
 const Login = () => {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  // Removed unused message state
-  const navigate = useNavigate()
-
-  const handleLogin = async () => {
-    if (!email || !password) {
-      toast.error('Por favor, informe email e senha.')
-      return
-    }
-    try {
-      await login(email, password)
-      toast.success('Login feito com sucesso!')
-      setTimeout(() => navigate('/lobby'), 1000)
-    } catch (error) {
-      console.error(error)
-      const errorWithCode = error as Error & { code?: string }
-
-      if (errorWithCode.code === 'auth/user-not-found') {
-        toast.error('Usuário não encontrado.')
-      } else if (errorWithCode.code === 'auth/invalid-credential') {
-        toast.error('Credenciais inválidas. Verifique seu email e senha.')
-      } else if (errorWithCode.code === 'auth/invalid-email') {
-        toast.error('Email inválido.')
-      } else if (errorWithCode.code === 'auth/too-many-requests') {
-        toast.error('Muitas tentativas de login. Tente novamente mais tarde.')
-      } else {
-        toast.error('Erro desconhecido ao fazer login.')
-      }
-    }
-  }
+  const { email, password, setEmail, setPassword, handleLogin } = useLoginForm()
 
   return (
     <div className={styles.loginPage}>
@@ -81,9 +49,9 @@ const Login = () => {
 
         <div className="text-center">
           <small>
-            <a href="/forgot-password" className={styles.forgotLink}>
+            <Link to="/forgot-password" className={styles.forgotLink}>
               Esqueceu a senha?
-            </a>
+            </Link>
           </small>
         </div>
 
@@ -92,17 +60,12 @@ const Login = () => {
         <div className="text-center">
           <small style={{ color: '#f8f8f2' }}>
             Não tem uma conta?{' '}
-            <a
-              href="/register"
-              className={styles.registerLink}
-              onClick={() => navigate('/register')}
-            >
+            <Link to="/register" className={styles.registerLink}>
               Cadastre-se
-            </a>
+            </Link>
           </small>
         </div>
       </div>
-      {/* Removed unused message rendering */}
     </div>
   )
 }
