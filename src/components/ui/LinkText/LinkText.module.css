@@ -1,0 +1,27 @@
+.default {
+  color: var(--color-accent);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.default:hover {
+  text-decoration: underline;
+}
+
+.forgot {
+  color: var(--color-info);
+  text-decoration: none;
+}
+
+.forgot:hover {
+  text-decoration: underline;
+}
+
+.register {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.register:hover {
+  text-decoration: underline;
+}

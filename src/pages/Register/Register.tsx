@@ -1,5 +1,9 @@
 import { useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { Button } from '../../components/ui/Button/Button'
+import Card from '../../components/ui/Card'
+import FormGroup from '../../components/ui/FormGroup'
+import { LinkText } from '../../components/ui/LinkText/LinkText'
+import Title from '../../components/ui/Title'
 import { useRegisterForm } from '../../hooks/useRegisterForm'
 import styles from './Register.module.css'
 
@@ -24,8 +28,8 @@ const Register = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.card}>
-        <h2 className={styles.title}>Criar Conta</h2>
+      <Card>
+        <Title>Criar Conta</Title>
 
         <FormGroup
           label="Nome de usuário"
@@ -68,53 +72,21 @@ const Register = () => {
           placeholder="Confirme sua senha"
           inputRef={confirmPasswordRef}
         />
-
-        <button
-          className={`btn w-100 ${styles.button}`}
-          onClick={handleRegister}
-        >
+        <Button onClick={handleRegister} fullWidth={true}>
           Cadastrar
-        </button>
+        </Button>
 
         <div className="text-center mt-3">
           <small>
             Já tem uma conta?{' '}
-            <Link to="/" className={styles.link}>
+            <LinkText to="/" variant="default">
               Entrar
-            </Link>
+            </LinkText>
           </small>
         </div>
-      </div>
+      </Card>
     </div>
   )
 }
-
-const FormGroup = ({
-  label,
-  type = 'text',
-  value,
-  onChange,
-  placeholder,
-  inputRef,
-}: {
-  label: string
-  type?: string
-  value: string
-  onChange: (v: string) => void
-  placeholder: string
-  inputRef?: React.RefObject<HTMLInputElement | null>
-}) => (
-  <div className="mb-3">
-    <label className="form-label">{label}</label>
-    <input
-      type={type}
-      className={`form-control ${styles.input}`}
-      value={value}
-      onChange={e => onChange(e.target.value)}
-      placeholder={placeholder}
-      ref={inputRef}
-    />
-  </div>
-)
 
 export default Register

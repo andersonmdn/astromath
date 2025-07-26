@@ -1,5 +1,5 @@
 /* src/pages/Login/Login */
-.loginPage {
+.container {
   background-color: var(--color-bg);
   height: 100vh;
   display: flex;
@@ -8,70 +8,6 @@
   flex-direction: column;
 }
 
-.loginCard {
-  background-color: var(--color-bg-panel);
-  color: var(--color-text);
-  width: 100%;
-  max-width: 420px;
-  padding: 2rem;
-  border-radius: var(--panel-radius);
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
-}
-
-.loginTitle {
-  color: var(--color-text);
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
-.inputField {
-  background-color: var(--color-input);
-  color: var(--color-white);
-  border: 1px solid var(--color-input);
-}
-
-.inputField::placeholder {
-  color: var(--color-text-placeholder);
-  opacity: 1;
-}
-
-.inputField:focus {
-  outline: none;
-  color: var(--color-white);
-  background-color: var(--color-input);
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
-}
-
-.btnLogin {
-  background-color: var(--color-primary);
-  color: var(--color-bg);
-}
-
-.forgotLink {
-  color: var(--color-info);
-  text-decoration: none;
-}
-
-.registerLink {
-  color: var(--color-accent);
-  text-decoration: none;
-}
-
 hr {
   border-color: var(--color-secondary);
-}
-
-.message {
-  text-align: center;
-  margin-bottom: 1rem;
-  font-weight: bold;
-}
-
-.success {
-  color: var(--color-success);
-}
-
-.error {
-  color: var(--color-danger);
 }

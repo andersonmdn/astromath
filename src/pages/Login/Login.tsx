@@ -1,7 +1,10 @@
 // src/pages/Login/Login.tsx
 import { useRef } from 'react'
-import { Link } from 'react-router-dom'
 import { Button } from '../../components/ui/Button/Button'
+import Card from '../../components/ui/Card'
+import FormGroup from '../../components/ui/FormGroup'
+import { LinkText } from '../../components/ui/LinkText/LinkText'
+import Title from '../../components/ui/Title'
 import { useLoginForm } from '../../hooks/useLoginForm'
 import styles from './Login.module.css'
 
@@ -12,41 +15,27 @@ const Login = () => {
     useLoginForm(emailRef, passwordRef)
 
   return (
-    <div className={styles.loginPage}>
-      <div className={styles.loginCard}>
-        <h2 className={`${styles.loginTitle} fw-bold text-uppercase fs-3`}>
-          Astromath
-        </h2>
+    <div className={styles.container}>
+      <Card>
+        <Title>Astromath</Title>
 
-        <div className="mb-3">
-          <label htmlFor="email" className="form-label">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            className={`form-control ${styles.inputField}`}
-            placeholder="Digite seu email"
-            value={email}
-            onChange={e => setEmailInput(e.target.value)}
-            ref={emailRef}
-          />
-        </div>
+        <FormGroup
+          label="Email"
+          type="email"
+          value={email}
+          onChange={setEmailInput}
+          placeholder="Digite seu email"
+          inputRef={emailRef}
+        />
 
-        <div className="mb-3">
-          <label htmlFor="password" className="form-label">
-            Senha
-          </label>
-          <input
-            id="password"
-            type="password"
-            className={`form-control ${styles.inputField}`}
-            placeholder="Digite sua senha"
-            value={password}
-            onChange={e => setPasswordInput(e.target.value)}
-            ref={passwordRef}
-          />
-        </div>
+        <FormGroup
+          label="Senha"
+          type="password"
+          value={password}
+          onChange={setPasswordInput}
+          placeholder="Digite sua senha"
+          inputRef={passwordRef}
+        />
 
         <Button fullWidth={true} onClick={handleLogin}>
           Entrar
@@ -54,9 +43,9 @@ const Login = () => {
 
         <div className="text-center pt-2">
           <small>
-            <Link to="/forgot-password" className={styles.forgotLink}>
+            <LinkText to="/forgot-password" variant="forgot">
               Esqueceu a senha?
-            </Link>
+            </LinkText>
           </small>
         </div>
 
@@ -65,12 +54,12 @@ const Login = () => {
         <div className="text-center">
           <small style={{ color: '#f8f8f2' }}>
             Não tem uma conta?{' '}
-            <Link to="/register" className={styles.registerLink}>
+            <LinkText to="/register" variant="register">
               Cadastre-se
-            </Link>
+            </LinkText>
           </small>
         </div>
-      </div>
+      </Card>
     </div>
   )
 }
