@@ -53,8 +53,8 @@ const Login = () => {
 
         <div className="text-center">
           <small style={{ color: '#f8f8f2' }}>
-            Não tem uma conta?{' '}
-            <LinkText to="/register" variant="register">
+            Não tem uma conta?
+            <LinkText to="/register" variant="register" className="m-1">
               Cadastre-se
             </LinkText>
           </small>

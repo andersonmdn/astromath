@@ -78,8 +78,8 @@ const Register = () => {
 
         <div className="text-center mt-3">
           <small>
-            Já tem uma conta?{' '}
-            <LinkText to="/" variant="default">
+            Já tem uma conta?
+            <LinkText to="/" variant="default" className="m-1">
               Entrar
             </LinkText>
           </small>

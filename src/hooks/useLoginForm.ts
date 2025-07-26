@@ -3,11 +3,11 @@ import { FirebaseError } from 'firebase/app'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { firebaseErrorMessages } from '../constants/firebaseErrorMessages'
 import { Email } from '../entities/Email'
 import { Password } from '../entities/Password'
 import { login } from '../services/authService'
 import { UseLoginFormReturn } from '../types/hooks/useLoginForm.types'
+import { firebaseAuthErrorMessages } from '../utils/firebase/firebaseAuthErrorMessages'
 
 export const useLoginForm = (
   emailRef: React.RefObject<HTMLInputElement | null>,
@@ -27,12 +27,6 @@ export const useLoginForm = (
     if (passwordRef && passwordRef.current) {
       passwordRef.current.focus()
     }
-  }
-
-  const handleFirebaseAuthError = (error: FirebaseError) => {
-    toast.error(
-      firebaseErrorMessages[error.code] || 'Erro desconhecido ao fazer login.'
-    )
   }
 
   const redirectToLobby = () => {
@@ -65,7 +59,7 @@ export const useLoginForm = (
       redirectToLobby()
     } catch (error) {
       if (error instanceof FirebaseError) {
-        handleFirebaseAuthError(error)
+        firebaseAuthErrorMessages(error)
       } else {
         toast.error('Erro desconhecido ao fazer login.')
       }

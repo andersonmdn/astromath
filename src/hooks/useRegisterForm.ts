@@ -3,12 +3,12 @@ import { FirebaseError } from 'firebase/app'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { firebaseErrorMessages } from '../constants/firebaseErrorMessages'
 import { Email } from '../entities/Email'
 import { Password } from '../entities/Password'
 import { signUp } from '../services/authService'
 import { createUserProfile } from '../services/userService'
 import { UseRegisterFormReturn } from '../types/hooks/useRegisterForm.types'
+import { firebaseAuthErrorMessages } from '../utils/firebase/firebaseAuthErrorMessages'
 
 export const useRegisterForm = (
   emailRef: React.RefObject<HTMLInputElement | null>,
@@ -83,17 +83,9 @@ export const useRegisterForm = (
           return
         }
 
-        const isPermissionError =
-          error.code === 'permission-denied' ||
-          (typeof error.message === 'string' &&
-            error.message.includes('Missing or insufficient permissions'))
+        firebaseAuthErrorMessages(error)
 
         await userCredential.user.delete()
-        toast.error(
-          isPermissionError
-            ? 'Erro de permissão ao criar conta. Cadastro cancelado.'
-            : 'Erro ao criar conta: ' + error.message
-        )
       }
     } catch (error) {
       if (!(error instanceof FirebaseError)) {
@@ -102,11 +94,7 @@ export const useRegisterForm = (
         return
       }
 
-      const code = error.code
-
-      toast.error(
-        firebaseErrorMessages[code] || 'Erro ao criar conta: ' + error.message
-      )
+      firebaseAuthErrorMessages(error)
     }
   }
 
