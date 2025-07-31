@@ -1,12 +1,35 @@
-.containerMain {
+.container {
   background-color: var(--color-bg);
   min-height: 100vh;
-  padding: 2rem;
+  min-width: 100vw;
+  padding: 1rem;
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
+
+.brandName {
+  background: linear-gradient(90deg, #ff5555, #bd93f9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: bold;
+}
+
+.userName {
+  background: var(--color-purple);
+  border-radius: 0.2rem;
+  color: var(--color-bg);
+  font-weight: bold;
+  margin-left: 0.5rem;
+  padding: 0.2rem 0.5rem;
+}
+
+.modal {
+  background: #bd93f9;
+}
+/*
 
 .title {
   text-align: center;
@@ -174,4 +197,4 @@
 .logoutButton:hover {
   background-color: var(--color-danger);
   color: var(--color-bg);
-}
+} */

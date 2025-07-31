@@ -11,7 +11,7 @@ import {
   where,
 } from 'firebase/firestore'
 import { db } from '../firebase/firebaseConfig'
-import IRoom from '../types/IRoom'
+import IRoom from '../types/Room'
 
 // Cria uma sala
 export const createRoom = async (roomData: IRoom) => {

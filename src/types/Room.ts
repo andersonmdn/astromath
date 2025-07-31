@@ -1,4 +1,4 @@
-interface IRoom {
+interface Room {
   createdAt: string
   createdBy: string
   id: string
@@ -9,4 +9,4 @@ interface IRoom {
   type: 'public' | 'private'
 }
 
-export default IRoom
+export default Room

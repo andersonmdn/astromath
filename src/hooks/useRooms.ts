@@ -2,19 +2,22 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { listAllRooms } from '../services/roomService'
 import { getUserProfile } from '../services/userService'
-import IRoom from '../types/IRoom'
+import Room from '../types/Room'
 
-export const useRooms = () => {
-  const [publicRooms, setPublicRooms] = useState<IRoom[]>([])
+interface UseRoomsReturn {
+  allRooms: Room[]
+}
+
+export const useRooms = (): UseRoomsReturn => {
+  const [allRooms, setAllRooms] = useState<Room[]>([])
   const { user } = useAuth()
 
   useEffect(() => {
     const fetchRooms = async () => {
       const rooms = await listAllRooms()
 
-      // Trocar o uID pelo nome do usuário
       if (!user) {
-        setPublicRooms(rooms)
+        setAllRooms(rooms)
         return
       }
 
@@ -24,11 +27,11 @@ export const useRooms = () => {
         ...room,
         createdBy: (userProfile && userProfile.username) || room.createdBy,
       }))
-      setPublicRooms(roomsWithUsernames)
+      setAllRooms(roomsWithUsernames)
     }
 
     fetchRooms()
   }, [user])
 
-  return { publicRooms }
+  return { allRooms }
 }

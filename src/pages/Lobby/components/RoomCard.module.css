@@ -1,0 +1,40 @@
+.roomCard {
+  cursor: pointer;
+  min-height: 200px;
+  background-color: var(--color-bg-panel);
+  color: var(--color-text);
+  width: 100%;
+  max-width: 420px;
+  padding: 2rem;
+  border-radius: var(--panel-radius);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.roomTitle {
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: var(--color-text);
+}
+
+.roomImages {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.roomImage {
+  border-radius: 5px;
+  margin-right: 10px;
+  max-width: 30px;
+}
+
+.roomDivider {
+  border: 1px solid var(--color-text-placeholder);
+  margin: 1rem 0;
+  width: 100%;
+}
