@@ -6,6 +6,7 @@ import FormGroup from '../../components/ui/FormGroup'
 import { LinkText } from '../../components/ui/LinkText/LinkText'
 import { useLobbyController } from '../../hooks/useLobbyController'
 import { CreateRoomModal } from './components/CreateRoomModal'
+import JoinRoomModal from './components/JoinRoomModal'
 import { RoomCard } from './components/RoomCard'
 import styles from './Lobby.module.css'
 
@@ -18,17 +19,17 @@ const Lobby = () => {
     setSearch,
     allRooms,
     //   filteredRooms,
-    //   setSelectedRoom,
-    //   setShowJoinModal,
+    setSelectedRoom,
+    setShowJoinModal,
     //   navigate,
     //   handleLogout,
     showCreateModal,
     setShowCreateModal,
-    //   showJoinModal,
-    //   selectedRoom,
-    //   joinPassword,
-    //   setJoinPassword,
-    //   handleJoinRoom,
+    showJoinModal,
+    selectedRoom,
+    joinPassword,
+    setJoinPassword,
+    handleJoinRoom,
     roomName,
     setRoomName,
     password,
@@ -72,7 +73,8 @@ const Lobby = () => {
                 <RoomCard
                   room={room}
                   onClick={() => {
-                    console.log(`Room clicked: ${room.name}`)
+                    setSelectedRoom(room)
+                    if (room.password) setShowJoinModal(true)
                   }}
                 />
               </div>
@@ -84,18 +86,26 @@ const Lobby = () => {
           </Card>
         )}
       </div>
-      {showCreateModal && (
-        <CreateRoomModal
-          roomName={roomName}
-          setRoomName={setRoomName}
-          password={password}
-          setPassword={setPassword}
-          onCreate={handleCreateRoom}
-          onClose={() => setShowCreateModal(false)}
-          roomNameRef={roomNameRef}
-          passwordRef={passwordRef}
-        />
-      )}
+
+      <CreateRoomModal
+        isOpen={showCreateModal}
+        roomName={roomName}
+        setRoomName={setRoomName}
+        password={password}
+        setPassword={setPassword}
+        onCreate={handleCreateRoom}
+        onClose={() => setShowCreateModal(false)}
+        roomNameRef={roomNameRef}
+        passwordRef={passwordRef}
+      />
+
+      <JoinRoomModal
+        isOpen={showJoinModal}
+        password={joinPassword}
+        setPassword={setJoinPassword}
+        onJoin={handleJoinRoom}
+        onClose={() => setShowJoinModal(false)}
+      />
       {/*
       <div className="container">
         <FormGroup
@@ -129,14 +139,7 @@ const Lobby = () => {
 
 
 
-      {showJoinModal && selectedRoom && (
-        <JoinRoomModal
-          password={joinPassword}
-          setPassword={setJoinPassword}
-          onJoin={handleJoinRoom}
-          onClose={() => setShowJoinModal(false)}
-        />
-      )} */}
+       */}
     </div>
   )
 }

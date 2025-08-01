@@ -1,7 +1,12 @@
 import { Button } from '../../../components/ui/Button/Button'
-import styles from '../Lobby.module.css'
+import Card from '../../../components/ui/Card'
+import FormGroup from '../../../components/ui/FormGroup'
+import Modal from '../../../components/ui/Modal'
+import Title from '../../../components/ui/Title'
+import styles from './JoinRoomModal.module.css'
 
 interface JoinRoomModalProps {
+  isOpen: boolean
   password: string
   setPassword: (v: string) => void
   onJoin: () => void
@@ -9,31 +14,31 @@ interface JoinRoomModalProps {
 }
 
 export const JoinRoomModal = ({
+  isOpen,
   password,
   setPassword,
   onJoin,
   onClose,
 }: JoinRoomModalProps) => (
-  <div className={styles.modalOverlay}>
-    <div className={styles.modalContent}>
-      <h5 className={styles.sectionTitle}>
-        Digite a senha para entrar na sala:
-      </h5>
-      <input
+  <Modal isOpen={isOpen} onClose={onClose}>
+    <Card onClick={e => e.stopPropagation()} className={styles.card}>
+      <Title>Entrar na Sala</Title>
+      <FormGroup
+        label="Senha da Sala"
+        placeholder="Digite a senha da sala"
         type="password"
-        className={`form-control mb-3 ${styles.formInput}`}
         value={password}
-        onChange={e => setPassword(e.target.value)}
+        onChange={setPassword}
       />
 
-      <Button fullWidth onClick={onJoin}>
+      <Button fullWidth onClick={onJoin} variant="confirm">
         Entrar
       </Button>
 
       <Button className={`btn mt-2 w-100 btn-outline-light`} onClick={onClose}>
         Cancelar
       </Button>
-    </div>
-  </div>
+    </Card>
+  </Modal>
 )
 export default JoinRoomModal

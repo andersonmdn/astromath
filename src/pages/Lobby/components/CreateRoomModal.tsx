@@ -2,10 +2,12 @@
 import { Button } from '../../../components/ui/Button/Button'
 import Card from '../../../components/ui/Card'
 import FormGroup from '../../../components/ui/FormGroup'
+import Modal from '../../../components/ui/Modal'
 import Title from '../../../components/ui/Title'
 import styles from './CreateRoomModal.module.css'
 
 interface Props {
+  isOpen: boolean
   roomName: string
   password: string
   setRoomName: (v: string) => void
@@ -17,6 +19,7 @@ interface Props {
 }
 
 export const CreateRoomModal = ({
+  isOpen,
   roomName,
   password,
   setRoomName,
@@ -26,12 +29,8 @@ export const CreateRoomModal = ({
   roomNameRef,
   passwordRef,
 }: Props) => (
-  <div className={styles.container} onClick={onClose}>
-    <Card
-      fullWidth={false}
-      className="flex flex-column align-items-center justify-content-center opacity-100"
-      onClick={e => e.stopPropagation()}
-    >
+  <Modal isOpen={isOpen} onClose={onClose}>
+    <Card fullWidth={false} className={styles.card}>
       <Title>Criar Sala</Title>
       <FormGroup
         label="Nome da Sala"
@@ -56,5 +55,5 @@ export const CreateRoomModal = ({
         Cancelar
       </Button>
     </Card>
-  </div>
+  </Modal>
 )

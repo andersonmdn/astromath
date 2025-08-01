@@ -1,7 +1,7 @@
 // frontend/src/context/SocketContext.tsx
 import { createContext, useContext } from 'react'
 import { Socket } from 'socket.io-client'
-import { useSocket as useSocketService } from '../services/socket'
+import { useSocket as useSocketService } from '../services/socketService'
 
 const SocketContext = createContext<Socket | null>(null)
 

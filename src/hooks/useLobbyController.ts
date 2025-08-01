@@ -1,7 +1,3 @@
-// import { doc, getDoc } from 'firebase/firestore'
-// import { useState } from 'react'
-// import { useNavigate } from 'react-router-dom'
-// import { toast } from 'react-toastify'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
@@ -10,12 +6,6 @@ import { useSocket } from '../context/SocketContext'
 import { createRoom } from '../services/roomService'
 import Room from '../types/Room'
 import { useRooms } from './useRooms'
-// import { db } from '../firebase/firebaseConfig'
-// import { logout } from '../services/authService'
-// import { createRoom } from '../services/roomService'
-// import { useSocket } from '../services/socket'
-// import IRoom from '../types/IRoom'
-// import { useRooms } from './useRooms'
 
 interface UseLobbyControllerReturn {
   roomName: string
@@ -24,10 +14,17 @@ interface UseLobbyControllerReturn {
   search: string
   showCreateModal: boolean
   allRooms: Room[]
+  selectedRoom: Room | null
+  joinPassword: string
+  showJoinModal: boolean
   setSearch: (value: string) => void
   setShowCreateModal: (value: boolean) => void
   setRoomName: (value: string) => void
   setPassword: (value: string) => void
+  setSelectedRoom: (room: Room | null) => void
+  setJoinPassword: (value: string) => void
+  setShowJoinModal: (value: boolean) => void
+  handleJoinRoom: () => void
   handleCreateRoom: () => void
 }
 export const useLobbyController = (
@@ -37,10 +34,10 @@ export const useLobbyController = (
   const [roomName, setRoomName] = useState('')
   const [password, setPassword] = useState('')
   const [search, setSearch] = useState('')
-  // const [selectedRoom, setSelectedRoom] = useState<IRoom | null>(null)
-  // const [joinPassword, setJoinPassword] = useState('')
+  const [selectedRoom, setSelectedRoom] = useState<Room | null>(null)
+  const [joinPassword, setJoinPassword] = useState('')
   const [showCreateModal, setShowCreateModal] = useState(false)
-  // const [showJoinModal, setShowJoinModal] = useState(false)
+  const [showJoinModal, setShowJoinModal] = useState(false)
 
   const navigate = useNavigate()
   const { user } = useAuth()
@@ -135,20 +132,20 @@ export const useLobbyController = (
     }
   }
 
-  // const handleJoinRoom = async () => {
-  //   if (!selectedRoom) return
+  const handleJoinRoom = async () => {
+    if (!selectedRoom) return
 
-  //   if (selectedRoom.password) {
-  //     const salaRef = doc(db, 'rooms', selectedRoom.id)
-  //     const salaSnap = await getDoc(salaRef)
-  //     if (!salaSnap.exists()) return alert('Sala não encontrada')
+    // if (selectedRoom.password) {
+    //   const salaRef = doc(db, 'rooms', selectedRoom.id)
+    //   const salaSnap = await getDoc(salaRef)
+    //   if (!salaSnap.exists()) return alert('Sala não encontrada')
 
-  //     const sala = salaSnap.data()
-  //     if (sala.password !== joinPassword) return alert('Senha incorreta')
-  //   }
+    //   const sala = salaSnap.data()
+    //   if (sala.password !== joinPassword) return alert('Senha incorreta')
+    // }
 
-  //   navigate(`/sala/${selectedRoom.id}`)
-  // }
+    // navigate(`/sala/${selectedRoom.id}`)
+  }
 
   // const handleLogout = async () => {
   //   await logout()
@@ -164,21 +161,21 @@ export const useLobbyController = (
     roomName,
     password,
     search,
-    // selectedRoom,
-    // joinPassword,
+    selectedRoom,
+    joinPassword,
     showCreateModal,
-    // showJoinModal,
+    showJoinModal,
     // publicRooms,
     allRooms,
     setRoomName,
     setPassword,
     setSearch,
-    // setSelectedRoom,
-    // setJoinPassword,
+    setSelectedRoom,
+    setJoinPassword,
     setShowCreateModal,
-    // setShowJoinModal,
+    setShowJoinModal,
     handleCreateRoom,
-    // handleJoinRoom,
+    handleJoinRoom,
     // handleLogout,
     // navigate, // usado no RoomCard para redirecionamento direto
   }
