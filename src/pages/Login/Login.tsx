@@ -5,14 +5,14 @@ import Card from '../../components/ui/Card'
 import FormGroup from '../../components/ui/FormGroup'
 import { LinkText } from '../../components/ui/LinkText/LinkText'
 import Title from '../../components/ui/Title'
-import { useLoginForm } from '../../hooks/useLoginForm'
+import { useLoginController } from '../../hooks/controllers/useLoginController'
 import styles from './Login.module.css'
 
 const Login = () => {
   const emailRef = useRef<HTMLInputElement | null>(null)
   const passwordRef = useRef<HTMLInputElement | null>(null)
   const { email, password, setEmailInput, setPasswordInput, handleLogin } =
-    useLoginForm(emailRef, passwordRef)
+    useLoginController(emailRef, passwordRef)
 
   return (
     <div className={styles.container}>

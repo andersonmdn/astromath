@@ -3,11 +3,11 @@ import Card from '../../components/ui/Card'
 import FormGroup from '../../components/ui/FormGroup'
 import { LinkText } from '../../components/ui/LinkText/LinkText'
 import Title from '../../components/ui/Title'
-import { useForgotPasswordForm } from '../../hooks/useForgotPasswordForm'
+import { useForgotPasswordController } from '../../hooks/controllers/useForgotPasswordContoller'
 import styles from './ForgotPassword.module.css'
 
 const ForgotPassword = () => {
-  const { email, setEmail, handleResetPassword } = useForgotPasswordForm()
+  const { email, setEmail, handleResetPassword } = useForgotPasswordController()
 
   return (
     <div className={styles.container}>

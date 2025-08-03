@@ -1,11 +1,12 @@
+// src/hooks/controllers/useLobbyController.ts
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { useAuth } from '../context/AuthContext'
-import { useSocket } from '../context/SocketContext'
-import { createRoom } from '../services/roomService'
-import Room from '../types/Room'
-import { useRooms } from './useRooms'
+import { useAuth } from '../../context/AuthContext'
+import { useSocket } from '../../context/SocketContext'
+import { createRoom } from '../../services/roomService'
+import Room from '../../types/Room'
+import { useRooms } from '../useRooms'
 
 interface UseLobbyControllerReturn {
   roomName: string
@@ -165,7 +166,6 @@ export const useLobbyController = (
     joinPassword,
     showCreateModal,
     showJoinModal,
-    // publicRooms,
     allRooms,
     setRoomName,
     setPassword,
@@ -176,7 +176,5 @@ export const useLobbyController = (
     setShowJoinModal,
     handleCreateRoom,
     handleJoinRoom,
-    // handleLogout,
-    // navigate, // usado no RoomCard para redirecionamento direto
   }
 }

@@ -1,18 +1,18 @@
-// src/hooks/useLoginForm.ts
+// src/hooks/controllers/useLoginController.ts
 import { FirebaseError } from 'firebase/app'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { Email } from '../entities/Email'
-import { Password } from '../entities/Password'
-import { login } from '../services/authService'
-import { UseLoginFormReturn } from '../types/hooks/useLoginForm.types'
-import { firebaseAuthErrorMessages } from '../utils/firebase/firebaseAuthErrorMessages'
+import { Email } from '../../entities/Email'
+import { Password } from '../../entities/Password'
+import { login } from '../../services/authService'
+import { UseLoginControllerReturn } from '../../types/hooks/useLoginController.types'
+import { firebaseAuthErrorMessages } from '../../utils/firebase/firebaseAuthErrorMessages'
 
-export const useLoginForm = (
+export const useLoginController = (
   emailRef: React.RefObject<HTMLInputElement | null>,
   passwordRef: React.RefObject<HTMLInputElement | null>
-): UseLoginFormReturn => {
+): UseLoginControllerReturn => {
   const [emailInput, setEmailInput] = useState('')
   const [passwordInput, setPasswordInput] = useState('')
   const navigate = useNavigate()

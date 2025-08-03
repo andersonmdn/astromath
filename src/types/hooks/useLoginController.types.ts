@@ -1,4 +1,4 @@
-export interface UseLoginFormReturn {
+export interface UseLoginControllerReturn {
   email: string
   password: string
   setEmailInput: (value: string) => void

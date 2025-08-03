@@ -4,7 +4,7 @@ import { Button } from '../../components/ui/Button/Button'
 import Card from '../../components/ui/Card'
 import FormGroup from '../../components/ui/FormGroup'
 import { LinkText } from '../../components/ui/LinkText/LinkText'
-import { useLobbyController } from '../../hooks/useLobbyController'
+import { useLobbyController } from '../../hooks/controllers/useLobbyController'
 import { CreateRoomModal } from './components/CreateRoomModal'
 import JoinRoomModal from './components/JoinRoomModal'
 import { RoomCard } from './components/RoomCard'
@@ -18,15 +18,11 @@ const Lobby = () => {
     search,
     setSearch,
     allRooms,
-    //   filteredRooms,
     setSelectedRoom,
     setShowJoinModal,
-    //   navigate,
-    //   handleLogout,
     showCreateModal,
     setShowCreateModal,
     showJoinModal,
-    selectedRoom,
     joinPassword,
     setJoinPassword,
     handleJoinRoom,
@@ -106,40 +102,6 @@ const Lobby = () => {
         onJoin={handleJoinRoom}
         onClose={() => setShowJoinModal(false)}
       />
-      {/*
-      <div className="container">
-        <FormGroup
-          label="Buscar sala pelo nome"
-          type="text"
-          value={search}
-          onChange={setSearch}
-          placeholder="Digite o nome da sala"
-        />
-
-        <Card className={`${styles.cardPanel} p-3`}>
-          {filteredRooms.map(room => (
-            <RoomCard
-              key={room.id}
-              room={room}
-              onClick={() => {
-                setSelectedRoom(room)
-                if (room.password) setShowJoinModal(true)
-                else navigate(`/waiting-room/${room.docId}`)
-              }}
-            />
-          ))}
-        </Card>
-
-        <div className="w-100 text-end">
-          <Button className={`w-100 ${styles.btnPrimary}`} onClick={() => setShowCreateModal(true)}>
-            Criar Nova Sala
-          </Button>
-        </div>
-      </div>
-
-
-
-       */}
     </div>
   )
 }

@@ -4,7 +4,7 @@ import Card from '../../components/ui/Card'
 import FormGroup from '../../components/ui/FormGroup'
 import { LinkText } from '../../components/ui/LinkText/LinkText'
 import Title from '../../components/ui/Title'
-import { useRegisterForm } from '../../hooks/useRegisterForm'
+import { useRegisterController } from '../../hooks/controllers/useRegisterController'
 import styles from './Register.module.css'
 
 const Register = () => {
@@ -24,7 +24,7 @@ const Register = () => {
     setPasswordInput,
     setConfirmPassword,
     handleRegister,
-  } = useRegisterForm(emailRef, passwordRef, confirmPasswordRef)
+  } = useRegisterController(emailRef, passwordRef, confirmPasswordRef)
 
   return (
     <div className={styles.container}>

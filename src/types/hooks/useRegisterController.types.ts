@@ -1,4 +1,4 @@
-export interface UseRegisterFormReturn {
+export interface UseRegisterControllerReturn {
   emailInput: string
   username: string
   birthday: string

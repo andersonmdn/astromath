@@ -1,20 +1,20 @@
-// src/hooks/useRegisterForm.ts
+// src/hooks/controllers/useRegisterController.ts
 import { FirebaseError } from 'firebase/app'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { Email } from '../entities/Email'
-import { Password } from '../entities/Password'
-import { signUp } from '../services/authService'
-import { createUserProfile } from '../services/userService'
-import { UseRegisterFormReturn } from '../types/hooks/useRegisterForm.types'
-import { firebaseAuthErrorMessages } from '../utils/firebase/firebaseAuthErrorMessages'
+import { Email } from '../../entities/Email'
+import { Password } from '../../entities/Password'
+import { signUp } from '../../services/authService'
+import { createUserProfile } from '../../services/userService'
+import { UseRegisterControllerReturn } from '../../types/hooks/useRegisterController.types'
+import { firebaseAuthErrorMessages } from '../../utils/firebase/firebaseAuthErrorMessages'
 
-export const useRegisterForm = (
+export const useRegisterController = (
   emailRef: React.RefObject<HTMLInputElement | null>,
   passwordRef: React.RefObject<HTMLInputElement | null>,
   confirmPasswordRef: React.RefObject<HTMLInputElement | null>
-): UseRegisterFormReturn => {
+): UseRegisterControllerReturn => {
   const [emailInput, setEmailInput] = useState('')
   const [username, setUsername] = useState('')
   const [birthday, setBirthday] = useState('')
