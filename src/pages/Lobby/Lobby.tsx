@@ -70,7 +70,9 @@ const Lobby = () => {
                   room={room}
                   onClick={() => {
                     setSelectedRoom(room)
-                    if (room.password) setShowJoinModal(true)
+                    if (room.password) return setShowJoinModal(true)
+
+                    handleJoinRoom()
                   }}
                 />
               </div>
