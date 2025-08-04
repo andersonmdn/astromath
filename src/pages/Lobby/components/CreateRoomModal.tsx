@@ -48,7 +48,7 @@ export const CreateRoomModal = ({
         placeholder="Digite a senha da sala"
         inputRef={passwordRef}
       ></FormGroup>
-      <Button variant="confirm" fullWidth onClick={onCreate}>
+      <Button variant="success" fullWidth onClick={onCreate}>
         Criar Sala
       </Button>
       <Button className="btn mt-2 w-100 btn-outline-light" onClick={onClose}>

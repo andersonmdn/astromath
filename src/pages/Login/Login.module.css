@@ -1,6 +1,6 @@
 /* src/pages/Login/Login */
 .container {
-  background-color: var(--color-bg);
+  background-color: var(--color-background);
   height: 100vh;
   display: flex;
   justify-content: center;

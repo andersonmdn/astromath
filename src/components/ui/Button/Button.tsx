@@ -4,7 +4,7 @@ import styles from './Button.module.css'
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode
   fullWidth?: boolean
-  variant?: 'primary' | 'secondary' | 'logout' | 'confirm'
+  variant?: 'primary' | 'danger' | 'success'
 }
 
 export const Button = ({

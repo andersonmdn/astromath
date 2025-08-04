@@ -42,7 +42,7 @@ const Lobby = () => {
             <span className={styles.userName}>{userName || ''}</span>
           </LinkText>
 
-          <Button variant="logout">Logout</Button>
+          <Button variant="danger">Logout</Button>
         </nav>
 
         <div className="container w-100">
@@ -55,7 +55,7 @@ const Lobby = () => {
               placeholder="Digite o nome da sala"
             />
 
-            <Button variant="confirm" onClick={() => setShowCreateModal(true)}>
+            <Button variant="success" onClick={() => setShowCreateModal(true)}>
               Criar Nova Sala
             </Button>
           </Card>

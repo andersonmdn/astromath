@@ -31,7 +31,7 @@ export const JoinRoomModal = ({
         onChange={setPassword}
       />
 
-      <Button fullWidth onClick={onJoin} variant="confirm">
+      <Button fullWidth onClick={onJoin} variant="success">
         Entrar
       </Button>
 

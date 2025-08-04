@@ -6,37 +6,37 @@
 }
 
 .button--primary {
-  background-color: var(--color-primary);
-  color: var(--color-bg);
-  border: 1px solid var(--color-primary);
+  background-color: var(--color-button-primary);
+  color: var(--color-white);
+  border: 1px solid var(--color-button-primary);
 }
 
 .button--primary:hover {
-  background-color: var(--color-accent);
+  background-color: transparent;
   color: var(--color-white);
-  border: 1px solid var(--color-accent);
+  border-color: var(--color-button-primary);
 }
 
-.button--logout {
-  background-color: var(--color-danger);
-  color: var(--color-bg);
-  border: 1px solid var(--color-border);
+.button--danger {
+  background-color: var(--color-button-danger);
+  color: var(--color-white);
+  border: 1px solid var(--color-button-danger);
 }
 
-.button--logout:hover {
-  background-color: var(--color-bg);
-  color: var(--color-white, #fff);
-  border-color: var(--color-danger);
+.button--danger:hover {
+  background-color: transparent;
+  color: var(--color-white);
+  border-color: var(--color-button-danger);
 }
 
-.button--confirm {
-  background-color: var(--color-success);
-  color: var(--color-bg);
-  border: 1px solid var(--color-success);
+.button--success {
+  background-color: var(--color-button-success);
+  color: var(--color-dark);
+  border: 1px solid var(--color-button-success);
 }
 
-.button--confirm:hover {
-  background-color: var(--color-bg);
-  color: var(--color-white, #fff);
-  border-color: var(--color-success);
+.button--success:hover {
+  background-color: transparent;
+  color: var(--color-white);
+  border-color: var(--color-button-success);
 }

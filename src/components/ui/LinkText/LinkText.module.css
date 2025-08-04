@@ -1,5 +1,5 @@
 .default {
-  color: var(--color-accent);
+  color: var(--color-link);
   text-decoration: none;
   font-weight: bold;
 }
@@ -9,7 +9,7 @@
 }
 
 .forgot {
-  color: var(--color-info);
+  color: var(--color-text);
   text-decoration: none;
 }
 
@@ -18,7 +18,7 @@
 }
 
 .register {
-  color: var(--color-accent);
+  color: var(--color-link);
   text-decoration: none;
 }
 

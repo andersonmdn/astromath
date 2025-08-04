@@ -1,10 +1,10 @@
 .card {
-  background-color: var(--color-bg-panel);
+  background-color: var(--color-background-card);
   color: var(--color-text);
   width: 100%;
   max-width: 420px;
   padding: 2rem;
-  border-radius: var(--panel-radius);
+  border-radius: var(--card-radius);
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
 }
 

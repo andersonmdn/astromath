@@ -6,13 +6,13 @@
 }
 
 .input::placeholder {
-  color: var(--color-text-placeholder);
+  color: var(--color-input-placeholder);
 }
 
 .input:focus {
   outline: none;
   color: var(--color-white);
   background-color: var(--color-input);
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+  border-color: var(--color-input-focus);
+  box-shadow: 0 0 0 0;
 }

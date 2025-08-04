@@ -1,21 +1,31 @@
 :root {
-  --color-bg: #0e0d11;
-  --color-bg-panel: #1d1b22;
-  --color-border: #44475a;
-  --color-text: #f8f8f2;
-  --color-text-placeholder: #a9a7ad;
+  /* Button Colors */
+  --color-button-primary: #bd93f9;
+  --color-button-success: #50fa7b;
+  --color-button-danger: #ff5555;
+
+  /* Input Colors */
   --color-input: #0e0d11;
+  --color-input-focus: #bd93f9;
+  --color-input-placeholder: #a9a7ad;
+  --color-input-border: #6272a4;
 
-  --color-primary: #bd93f9;
+  /* Link Colors */
+  --color-link: #ff79c6;
+
+  /* General Colors */
+  --color-background: #0e0d11;
+  --color-background-card: #1d1b22;
+  --color-text: #f8f8f2;
+
+  /* Color Palette */
   --color-secondary: #6272a4;
-  --color-accent: #ff79c6;
-  --color-success: #50fa7b;
-  --color-danger: #ff5555;
   --color-white: #ffffff;
-
+  --color-dark: #282a36;
   --color-purple: #7359f8;
 
-  --radius: 10px;
-  --panel-radius: 10px;
+  /* Other Constants */
   --font-default: monospace;
+  --radius: 10px;
+  --card-radius: 10px;
 }
