@@ -33,6 +33,11 @@ export function PlacementView({ room, boardReady, waitingForOpponent }: Placemen
   const [placements, setPlacements] = useState<PlacementEntry[]>([]);
   const [selectedShip, setSelectedShip] = useState<ShipType | null>(null);
   const [orientation, setOrientation] = useState<Orientation>("radial");
+
+  function handleSelectShip(type: ShipType | null) {
+    setSelectedShip(type);
+    if (type === "combat") setOrientation("angular");
+  }
   const [previewCells, setPreviewCells] = useState<CellCoord[]>([]);
   const [previewValid, setPreviewValid] = useState(false);
 
@@ -98,7 +103,7 @@ export function PlacementView({ room, boardReady, waitingForOpponent }: Placemen
       <div>
         <h2 className="text-lg font-bold">Posicionar Naves</h2>
         <p className="text-xs text-gray-400">
-          Selecione a nave, escolha orientação e clique no tabuleiro.
+          Selecione a nave, escolha a orientação e clique no tabuleiro.
         </p>
       </div>
 
@@ -117,7 +122,7 @@ export function PlacementView({ room, boardReady, waitingForOpponent }: Placemen
             board={localBoard}
             selectedShip={selectedShip}
             orientation={orientation}
-            onSelectShip={setSelectedShip}
+            onSelectShip={handleSelectShip}
             onChangeOrientation={setOrientation}
           />
 
@@ -126,20 +131,20 @@ export function PlacementView({ room, boardReady, waitingForOpponent }: Placemen
               onClick={handleReset}
               className="flex-1 rounded border border-gray-600 py-2 text-sm text-gray-400 hover:bg-gray-800 transition-colors"
             >
-              Resetar
+              Limpar
             </button>
             <button
               onClick={handleSubmit}
               disabled={!fleetComplete}
               className="flex-1 rounded bg-green-700 py-2 text-sm font-semibold text-white hover:bg-green-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
-              Confirmar Board
+              Confirmar Tabuleiro
             </button>
           </div>
 
           {!fleetComplete && (
             <p className="text-center text-xs text-gray-600">
-              Posicione todas as naves para confirmar.
+              Posicione todas as naves para confirmar o tabuleiro.
             </p>
           )}
         </div>

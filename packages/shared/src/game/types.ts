@@ -9,27 +9,30 @@ export type Orientation = "radial" | "angular";
 
 // ─── Ships ───────────────────────────────────────────────────────────────────
 
-export type ShipType = "destroyer" | "cruiser" | "battleship" | "carrier";
+export type ShipType = "patrol" | "recon" | "multi" | "combat";
 
 export interface ShipConfig {
   type: ShipType;
+  label: string;
   size: number;
+  totalGroups: number;
+  allowedOrientations: Orientation[] | null; // null = both; restricted list otherwise
+  color: string;
 }
 
 export const SHIP_CONFIGS: Record<ShipType, ShipConfig> = {
-  destroyer:  { type: "destroyer",  size: 2 },
-  cruiser:    { type: "cruiser",    size: 3 },
-  battleship: { type: "battleship", size: 4 },
-  carrier:    { type: "carrier",    size: 5 },
+  patrol: { type: "patrol", label: "Patrulha",       size: 1, totalGroups: 5, allowedOrientations: null,         color: "#0891b2" },
+  recon:  { type: "recon",  label: "Reconhecimento", size: 2, totalGroups: 2, allowedOrientations: null,         color: "#ea580c" },
+  multi:  { type: "multi",  label: "Multifunção",    size: 3, totalGroups: 1, allowedOrientations: null,         color: "#7c3aed" },
+  combat: { type: "combat", label: "Combate",        size: 4, totalGroups: 1, allowedOrientations: ["angular"],  color: "#15803d" },
 };
 
 // Required fleet: must place all of these before battle starts
 export const INITIAL_FLEET: ShipType[] = [
-  "carrier",
-  "battleship",
-  "cruiser",
-  "destroyer",
-  "destroyer",
+  "patrol", "patrol", "patrol", "patrol", "patrol",
+  "recon", "recon",
+  "multi",
+  "combat",
 ];
 
 export interface PlacedShip {

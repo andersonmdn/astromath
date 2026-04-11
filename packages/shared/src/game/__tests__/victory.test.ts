@@ -7,7 +7,7 @@ import type { GameState } from "../types.js";
 
 function sunkDestroyerBoard() {
   let board = createBoard();
-  board = placeShip(board, { sector: 0, ring: 0 }, "destroyer", "radial", "d1")!;
+  board = placeShip(board, { sector: 0, ring: 0 }, "recon", "radial", "d1")!;
   board = fireAt(board, { sector: 0, ring: 0 })!.board;
   board = fireAt(board, { sector: 0, ring: 1 })!.board;
   return board;
@@ -19,7 +19,7 @@ describe("isAllSunk", () => {
   });
 
   it("returns false when ship is still alive", () => {
-    const board = placeShip(createBoard(), { sector: 0, ring: 0 }, "destroyer", "radial", "d1")!;
+    const board = placeShip(createBoard(), { sector: 0, ring: 0 }, "recon", "radial", "d1")!;
     expect(isAllSunk(board)).toBe(false);
   });
 

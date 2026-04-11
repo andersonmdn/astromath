@@ -5,7 +5,7 @@ import { fireAt } from "../fire.js";
 
 function boardWithDestroyer() {
   const board = createBoard();
-  return placeShip(board, { sector: 0, ring: 0 }, "destroyer", "radial", "d1")!;
+  return placeShip(board, { sector: 0, ring: 0 }, "recon", "radial", "d1")!;
 }
 
 describe("fireAt — miss", () => {

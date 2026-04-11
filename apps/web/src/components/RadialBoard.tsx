@@ -1,7 +1,7 @@
 "use client";
 
 import type { Board, CellCoord } from "@astromath/shared";
-import { BOARD_CONFIG, coordsEqual } from "@astromath/shared";
+import { BOARD_CONFIG, SHIP_CONFIGS, coordsEqual } from "@astromath/shared";
 
 const SVG_SIZE = 380;
 const CX = 190;
@@ -71,8 +71,10 @@ export function RadialBoard({
           if (isPreview) {
             fill = previewValid ? "#14532d" : "#7f1d1d";
           } else {
-            if (cell.state === "ship") fill = "#4338ca";
-            else if (cell.state === "hit") fill = "#dc2626";
+            if (cell.state === "ship") {
+              const ship = cell.shipId ? board.ships.find((s) => s.id === cell.shipId) : null;
+              fill = ship ? SHIP_CONFIGS[ship.type].color : "#4338ca";
+            } else if (cell.state === "hit") fill = "#dc2626";
             else if (cell.state === "miss") fill = "#4b5563";
             else if (cell.state === "sunk") fill = "#7f1d1d";
           }

@@ -60,11 +60,15 @@ describe("isFleetComplete / registerBoard", () => {
   it("returns true after placing full fleet", () => {
     let board = createBoard();
     const configs: Array<{ type: (typeof INITIAL_FLEET)[number]; sector: number; ring: number }> = [
-      { type: "carrier",    sector: 0, ring: 0 },
-      { type: "battleship", sector: 1, ring: 0 },
-      { type: "cruiser",    sector: 2, ring: 0 },
-      { type: "destroyer",  sector: 3, ring: 0 },
-      { type: "destroyer",  sector: 4, ring: 0 },
+      { type: "patrol", sector: 0, ring: 0 },
+      { type: "patrol", sector: 1, ring: 0 },
+      { type: "patrol", sector: 2, ring: 0 },
+      { type: "patrol", sector: 3, ring: 0 },
+      { type: "patrol", sector: 4, ring: 0 },
+      { type: "recon",  sector: 5, ring: 0 }, // radial: {5,0},{5,1}
+      { type: "recon",  sector: 6, ring: 0 }, // radial: {6,0},{6,1}
+      { type: "multi",  sector: 7, ring: 0 }, // radial: {7,0},{7,1},{7,2}
+      { type: "combat", sector: 0, ring: 2 }, // radial: {0,2},{0,3},{0,4},{0,5}
     ];
     configs.forEach(({ type, sector, ring }, i) => {
       const result = placeShip(board, { sector, ring }, type, "radial", `ship-${i}`);
