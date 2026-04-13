@@ -9,7 +9,10 @@ import {
   getShipCells,
   validatePlacement,
   isFleetComplete,
+  INITIAL_FLEET,
 } from "@astromath/shared";
+
+const FLEET_ORDER: ShipType[] = ["patrol", "recon", "multi", "combat"];
 import { RadialBoard } from "@/components/RadialBoard";
 import { ShipSelector } from "@/components/ShipSelector";
 import { gameStore } from "@/lib/gameStore";
@@ -61,14 +64,27 @@ export function PlacementView({ room, boardReady, waitingForOpponent }: Placemen
       const newBoard = placeShip(localBoard, coord, selectedShip, orientation, id);
       if (!newBoard) return;
       setLocalBoard(newBoard);
-      setPlacements((prev) => [
-        ...prev,
-        { shipId: id, type: selectedShip, sector: coord.sector, ring: coord.ring, orientation },
-      ]);
-      setSelectedShip(null);
+
+      const entry: PlacementEntry = { shipId: id, type: selectedShip, sector: coord.sector, ring: coord.ring, orientation };
+      const newPlacements = [...placements, entry];
+      setPlacements(newPlacements);
       setPreviewCells([]);
+
+      const totalCounts = FLEET_ORDER.reduce(
+        (acc, t) => ({ ...acc, [t]: INITIAL_FLEET.filter((f) => f === t).length }),
+        {} as Record<ShipType, number>
+      );
+      const placedCounts = FLEET_ORDER.reduce(
+        (acc, t) => ({ ...acc, [t]: newPlacements.filter((p) => p.type === t).length }),
+        {} as Record<ShipType, number>
+      );
+
+      const currentIdx = FLEET_ORDER.indexOf(selectedShip);
+      const ordered = [...FLEET_ORDER.slice(currentIdx), ...FLEET_ORDER.slice(0, currentIdx)];
+      const next = ordered.find((t) => placedCounts[t] < totalCounts[t]) ?? null;
+      handleSelectShip(next);
     },
-    [localBoard, selectedShip, orientation]
+    [localBoard, selectedShip, orientation, placements]
   );
 
   function handleReset() {
