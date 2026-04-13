@@ -1,4 +1,5 @@
 import { Server } from "colyseus";
+import { WebSocketTransport } from "@colyseus/ws-transport";
 import { createServer } from "http";
 import { GameRoom } from "./rooms/GameRoom.js";
 
@@ -8,13 +9,12 @@ const httpServer = createServer((req, res) => {
   if (req.url === "/health") {
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ status: "ok", service: "game-server" }));
-    return;
   }
-  res.writeHead(404);
-  res.end();
 });
 
-const gameServer = new Server({ server: httpServer });
+const gameServer = new Server({
+  transport: new WebSocketTransport({ server: httpServer }),
+});
 
 gameServer.define("game", GameRoom);
 

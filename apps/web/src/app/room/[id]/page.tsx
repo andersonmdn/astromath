@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, use } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { gameClient } from "@/lib/gameClient";
 import { gameStore } from "@/lib/gameStore";
-import type { Room } from "colyseus.js";
+import type { Room } from "@colyseus/sdk";
 import { LobbyView } from "./LobbyView";
 import { PlacementView } from "./PlacementView";
 import { BattleView } from "./BattleView";
@@ -30,7 +30,7 @@ export default function RoomPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const roomRef = useRef<Room | null>(null);
-
+  
   const [state, setState] = useState<RoomState>({
     players: [],
     phase: "lobby",
@@ -48,12 +48,10 @@ export default function RoomPage() {
     if (durationMs > 0) setTimeout(() => setNotification(""), durationMs);
   }
 
-  function syncState(raw: unknown) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const s = raw as any;
+  function syncState(newState: RoomState) {
     const players: PlayerInfo[] = [];
-    // Use MapSchema.forEach — Object.values() does not iterate Map/MapSchema entries
-    s.players.forEach((p: any) => {
+    
+    newState.players.forEach((p) => {
       players.push({
         id: p.id,
         name: p.name,
@@ -61,13 +59,13 @@ export default function RoomPage() {
         boardReady: p.boardReady,
       });
     });
-
+    
     setState({
       players,
-      phase: s.phase ?? "lobby",
-      currentTurn: s.currentTurn ?? "",
-      winner: s.winner ?? "",
-      mode: (s.mode === "math" ? "math" : "classic") as "classic" | "math",
+      phase: newState.phase ?? "lobby",
+      currentTurn: newState.currentTurn ?? "",
+      winner: newState.winner ?? "",
+      mode: (newState.mode === "math" ? "math" : "classic") as "classic" | "math",
     });
   }
 
@@ -76,19 +74,25 @@ export default function RoomPage() {
 
     function setupRoom(room: Room) {
       if (!active) return;
+
       roomRef.current = room;
       setMyId(room.sessionId);
 
       // Persist reconnection token across page refreshes
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const token = (room as any).reconnectionToken as string | undefined;
-      if (token) sessionStorage.setItem(reconnectKey(id), token);
+      if (room.reconnectionToken) sessionStorage.setItem(reconnectKey(id), room.reconnectionToken);
 
       syncState(room.state);
       room.onStateChange(syncState);
 
       room.onMessage("error", (data: { code: string; message: string }) => {
         showNotification(`[${data.code}] ${data.message}`);
+      });
+
+      room.onMessage("player_joined", (data: { playerId: string; name: string }) => {
+        setState((prev) => ({
+          ...prev,
+          players: [...prev.players, { id: data.playerId, name: data.name, isReady: false, boardReady: false }],
+        }));
       });
 
       // legacy compat — server still used board_error before Etapa 8
@@ -106,6 +110,13 @@ export default function RoomPage() {
 
       room.onMessage("battle_ready", (data: { firstTurn: string }) => {
         setState((prev) => ({ ...prev, phase: "battle", currentTurn: data.firstTurn }));
+      });
+
+      room.onMessage("shot_result", (data: { shooterId: string }) => {
+        setState((prev) => {
+          const nextTurn = prev.players.find((p) => p.id !== data.shooterId)?.id ?? prev.currentTurn;
+          return { ...prev, currentTurn: nextTurn };
+        });
       });
 
       room.onMessage("game_over", (data: { winner: string }) => {
@@ -152,8 +163,9 @@ export default function RoomPage() {
     }
 
     const existingRoom = gameStore.getRoom();
-    if (existingRoom && existingRoom.id === id) {
+    if (existingRoom && existingRoom.roomId === id) {
       setupRoom(existingRoom);
+      existingRoom.send("screen_ready");
       return () => { active = false; };
     }
 
@@ -209,7 +221,7 @@ export default function RoomPage() {
     <main className="flex min-h-screen items-center justify-center bg-gray-950 text-white p-4">
       <div className="w-full max-w-2xl">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-xl font-bold">AstroMath</h1>
+          <h1 className="text-xl font-bold">AstroMath - {state.players.map(p => p.name).join(", ")}</h1>
           <button
             onClick={handleLeave}
             className="text-sm text-gray-500 hover:text-gray-300"

@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "@astromath/shared": "workspace:*",
-    "colyseus.js": "^0.15.28",
+    "@colyseus/react": "^0.1.14",
+    "@colyseus/sdk": "^0.17.26",
     "next": "^15.1.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

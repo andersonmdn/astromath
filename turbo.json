@@ -3,9 +3,19 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "dist/**"]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+    },
+    "@astromath/game-server#build": {
+      "dependsOn": ["^build", "@astromath/shared#build"],
+      "outputs": ["dist/**"]
     },
     "dev": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    },
+    "@astromath/game-server#dev": {
+      "dependsOn": ["@astromath/shared#build"],
       "cache": false,
       "persistent": true
     },

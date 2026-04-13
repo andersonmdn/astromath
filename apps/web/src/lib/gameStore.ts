@@ -1,4 +1,4 @@
-import type { Room } from "colyseus.js";
+import type { Room } from "@colyseus/sdk";
 import type { Board } from "@astromath/shared";
 
 // Module-level store — persists during client-side navigation

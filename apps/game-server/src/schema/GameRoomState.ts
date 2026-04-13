@@ -5,6 +5,7 @@ export class PlayerState extends Schema {
   @type("string") name: string = "";
   @type("boolean") isReady: boolean = false;
   @type("boolean") boardReady: boolean = false;
+  @type("boolean") screenReady: boolean = false;
 }
 
 export type GamePhase = "lobby" | "placement" | "battle" | "finished";

@@ -25,12 +25,13 @@ interface SubmitBoardPayload {
 
 const RECONNECTION_TIMEOUT = Number(process.env.RECONNECTION_TIMEOUT ?? 30);
 
-export class GameRoom extends Room<GameRoomState> {
+export class GameRoom extends Room {
   maxClients = 2;
   private playerBoards = new Map<string, Board>();
+  
+  state = new GameRoomState();
 
   onCreate(options: CreateOptions = {}) {
-    this.setState(new GameRoomState());
     this.state.mode = options.mode === "math" ? "math" : "classic";
     this.log(`sala criada — modo: ${this.state.mode}`);
 
@@ -84,6 +85,8 @@ export class GameRoom extends Room<GameRoomState> {
         return;
       }
 
+      this.log(`recebido fire de ${client.sessionId} em (${data.sector}, ${data.ring})`);
+
       const opponentId = Array.from(this.state.players.keys()).find(
         (id) => id !== client.sessionId
       );
@@ -100,6 +103,8 @@ export class GameRoom extends Room<GameRoomState> {
       }
 
       this.playerBoards.set(opponentId, fired.board);
+
+      this.log(`resultado do tiro: ${fired.result} — board atualizado para o oponente`);
 
       this.broadcast("shot_result", {
         shooterId: client.sessionId,
@@ -132,6 +137,17 @@ export class GameRoom extends Room<GameRoomState> {
       this.playerBoards.delete(client.sessionId);
     });
 
+    this.onMessage("screen_ready", (client: Client) => {
+      const player = this.state.players.get(client.sessionId);
+      if (!player) {
+        this.log(`screen_ready: jogador ${client.sessionId} não encontrado`);
+        return;
+      }
+      player.screenReady = true;
+      this.log(`screen_ready: ${player.name} (${client.sessionId}) está pronto na tela de lobby — players prontos: ${Array.from(this.state.players.values()).filter(p => p.screenReady).length}/2`);
+      console.log(this.state);
+    });
+
     // Math mode: wrong answer causes the current player to lose their turn
     this.onMessage("skip_turn", (client: Client) => {
       if (this.state.phase !== "battle") return;
@@ -142,7 +158,7 @@ export class GameRoom extends Room<GameRoomState> {
       if (!opponentId) return;
       this.state.currentTurn = opponentId;
       const name = this.state.players.get(client.sessionId)?.name;
-      this.log(`${name} errou a pergunta — vez passou para adversário`);
+      this.log(`${name} (${client.sessionId}) errou a pergunta — vez passou para adversário`);
     });
   }
 
@@ -151,33 +167,40 @@ export class GameRoom extends Room<GameRoomState> {
     player.id = client.sessionId;
     player.name = options.name?.trim() || `Player ${this.state.players.size + 1}`;
     this.state.players.set(client.sessionId, player);
-    this.log(`${player.name} entrou (${this.state.players.size}/2)`);
+    this.log(`${player.name} (${player.id}) entrou (${this.state.players.size}/2)`);
   }
 
-  async onLeave(client: Client, consented: boolean) {
+  async onDrop(client: Client) {
     const player = this.state.players.get(client.sessionId);
-    const playerName = player?.name ?? client.sessionId;
+    if (!player) return;
+
     const phase = this.state.phase;
+    if (phase === "lobby" || phase === "finished") return; // onLeave handles cleanup
 
-    if (consented || phase === "lobby" || phase === "finished") {
-      this.log(`${playerName} saiu (consented=${consented}, phase=${phase})`);
-      this.removePlayer(client);
-      return;
-    }
-
-    this.log(`${playerName} desconectou — aguardando reconexão (${RECONNECTION_TIMEOUT}s)`);
+    const playerName = player.name;
+    this.log(`${playerName} (${client.sessionId}) desconectou — aguardando reconexão (${RECONNECTION_TIMEOUT}s)`);
 
     try {
       await this.allowReconnection(client, RECONNECTION_TIMEOUT);
-      this.log(`${playerName} reconectou`);
+      this.log(`${playerName} (${client.sessionId}) reconectou`);
     } catch {
-      this.log(`${playerName} abandonou (timeout ${RECONNECTION_TIMEOUT}s)`);
+      this.log(`${playerName} (${client.sessionId}) abandonou (timeout ${RECONNECTION_TIMEOUT}s)`);
       this.broadcast("opponent_abandoned", {
         sessionId: client.sessionId,
         name: playerName,
       });
       this.removePlayer(client);
     }
+  }
+
+  onLeave(client: Client, code: number) {
+    const player = this.state.players.get(client.sessionId);
+    if (!player) return; // already removed by onDrop timeout
+
+    const playerName = player.name;
+    const phase = this.state.phase;
+    this.log(`${playerName} (${client.sessionId}) saiu (code=${code}, phase=${phase})`);
+    this.removePlayer(client);
   }
 
   onDispose() {

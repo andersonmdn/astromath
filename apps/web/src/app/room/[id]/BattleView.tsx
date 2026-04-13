@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import type { Room } from "colyseus.js";
+import { useEffect, useState, useCallback, useRef } from "react";
+import type { Room } from "@colyseus/sdk";
 import type { Board, CellCoord, ShotResult } from "@astromath/shared";
 import { createBoard, coordsEqual } from "@astromath/shared";
 import { gameStore } from "@/lib/gameStore";
@@ -83,6 +83,16 @@ export function BattleView({
   const [lastResult, setLastResult] = useState<(ShotResult & { shooterId: string }) | null>(null);
   const [pendingTarget, setPendingTarget] = useState<CellCoord | null>(null);
   const [activeQuestion, setActiveQuestion] = useState<string | null>(null);
+  const [localTurn, setLocalTurn] = useState<string>(currentTurn);
+
+  // Sync prop changes (e.g. skip_turn in math mode, or initial setup)
+  useEffect(() => {
+    setLocalTurn(currentTurn);
+  }, [currentTurn]);
+
+  // Keep a ref to players to avoid stale closure in the shot_result handler
+  const playersRef = useRef(players);
+  useEffect(() => { playersRef.current = players; });
 
   useEffect(() => {
     const unsub = room.onMessage(
@@ -94,6 +104,14 @@ export function BattleView({
           setDefenseBoard((prev) => applyResult(prev, data.result));
         }
         setLastResult({ ...data.result, shooterId: data.shooterId });
+        // Update turn immediately without waiting for onStateChange patch
+        console.log(`shot_result recebido: ${data.shooterId} atirou em (${data.coord.sector}, ${data.coord.ring}) com resultado ${data.result.type}`);
+        const nextTurn = playersRef.current.find((p) => p.id !== data.shooterId)?.id;
+        console.log(players)
+        console.log(playersRef)
+        console.log(data)
+        console.log(`próximo turno: ${nextTurn}`);
+        if (nextTurn) setLocalTurn(nextTurn);
       }
     );
     return () => unsub();
@@ -101,7 +119,7 @@ export function BattleView({
 
   const handleAttackCell = useCallback(
     (coord: CellCoord) => {
-      if (currentTurn !== myId) return;
+      if (localTurn !== myId) return;
       const cell = attackBoard.cells[coord.sector][coord.ring];
       if (cell.state !== "empty") return;
 
@@ -113,7 +131,7 @@ export function BattleView({
         room.send("fire", { sector: coord.sector, ring: coord.ring });
       }
     },
-    [currentTurn, myId, attackBoard, room, mode]
+    [localTurn, myId, attackBoard, room, mode]
   );
 
   function handleMathAnswer(correct: boolean) {
@@ -128,7 +146,7 @@ export function BattleView({
     setActiveQuestion(null);
   }
 
-  const isMyTurn = currentTurn === myId;
+  const isMyTurn = localTurn === myId;
   const me = players.find((p) => p.id === myId);
   const opponent = players.find((p) => p.id !== myId);
   const winnerName =

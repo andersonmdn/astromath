@@ -1,6 +1,6 @@
 "use client";
 
-import type { Room } from "colyseus.js";
+import type { Room } from "@colyseus/sdk";
 
 interface PlayerInfo {
   id: string;

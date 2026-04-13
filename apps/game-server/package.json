@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "predev": "fuser -k 2567/tcp 2>/dev/null || true",
+    "dev": "tsx watch --watch src src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "validate": "tsx scripts/validate.ts",
@@ -11,14 +12,15 @@
   },
   "dependencies": {
     "@astromath/shared": "workspace:*",
-    "@colyseus/monitor": "^0.15.6",
-    "@colyseus/schema": "^2.0.37",
-    "colyseus": "^0.15.22"
+    "@colyseus/monitor": "^0.17.8",
+    "@colyseus/schema": "^4.0.8",
+    "@colyseus/ws-transport": "^0.17.13",
+    "colyseus": "^0.17.8"
   },
   "devDependencies": {
     "@astromath/config": "workspace:*",
     "@types/node": "^22.10.7",
-    "colyseus.js": "^0.15.28",
+    "@colyseus/sdk": "^0.17.26",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3"
   }

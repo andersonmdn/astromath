@@ -22,7 +22,7 @@ export default function Home() {
       const room = await gameClient.create("game", { name: nickname.trim(), mode });
       gameStore.setNickname(nickname.trim());
       gameStore.setRoom(room);
-      router.push(`/room/${room.id}`);
+      router.push(`/room/${room.roomId}`);
     } catch (e) {
       setError("Erro ao criar sala.");
       setLoading(false);
@@ -38,7 +38,7 @@ export default function Home() {
       const room = await gameClient.joinById(code.trim(), { name: nickname.trim() });
       gameStore.setNickname(nickname.trim());
       gameStore.setRoom(room);
-      router.push(`/room/${room.id}`);
+      router.push(`/room/${room.roomId}`);
     } catch (e) {
       setError("Sala não encontrada ou já está cheia.");
       setLoading(false);
