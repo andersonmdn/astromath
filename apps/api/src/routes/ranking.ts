@@ -12,7 +12,7 @@ export async function rankingRoutes(app: FastifyInstance) {
       orderBy: { wins: { _count: "desc" } },
     });
 
-    return players.map((p) => ({
+    return players.map((p: (typeof players)[number]) => ({
       name: p.name,
       wins: p._count.wins,
       matches: p._count.matchesAsP1 + p._count.matchesAsP2,
