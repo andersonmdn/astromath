@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
+    "build": "tsup src/index.ts --format esm --platform node --out-dir dist",
     "start": "node dist/index.js",
     "clean": "rm -rf dist",
     "db:generate": "prisma generate",
@@ -25,6 +25,7 @@
     "@types/node": "^22.10.7",
     "@types/pg": "^8.0.0",
     "prisma": "^7.0.0",
+    "tsup": "^8.0.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3"
   }
