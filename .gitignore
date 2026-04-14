@@ -6,6 +6,6 @@ dist
 *.env.local
 
 # Prisma generated client
-apps/api/generated/
+apps/api/src/generated/
 
 old-project-dont-use/
