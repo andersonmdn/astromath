@@ -43,6 +43,7 @@ interface RadialBoardProps {
   interactive?: boolean;
   onCellClick?: (coord: CellCoord) => void;
   onCellHover?: (coord: CellCoord | null) => void;
+  cellColors?: Map<string, string>;
 }
 
 export function RadialBoard({
@@ -52,6 +53,7 @@ export function RadialBoard({
   interactive = false,
   onCellClick,
   onCellHover,
+  cellColors,
 }: RadialBoardProps) {
   return (
     <svg
@@ -74,9 +76,9 @@ export function RadialBoard({
             if (cell.state === "ship") {
               const ship = cell.shipId ? board.ships.find((s) => s.id === cell.shipId) : null;
               fill = ship ? SHIP_CONFIGS[ship.type].color : "#4338ca";
-            } else if (cell.state === "hit") fill = "#dc2626";
+            } else if (cell.state === "hit") fill = cellColors?.get(`${s},${r}`) ?? "#dc2626";
             else if (cell.state === "miss") fill = "#4b5563";
-            else if (cell.state === "sunk") fill = "#7f1d1d";
+            else if (cell.state === "sunk") fill = cellColors?.get(`${s},${r}`) ?? "#7f1d1d";
           }
 
           return (

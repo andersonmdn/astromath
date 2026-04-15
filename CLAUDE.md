@@ -83,24 +83,52 @@ packages/config   Base tsconfig files (base, node, nextjs)
 | `apps/game-server/.env` | `API_URL` | `http://localhost:3001` |
 | `apps/game-server/.env` | `RECONNECTION_TIMEOUT` | `30` (seconds) |
 
+### Game modes
+
+| Mode | Value | Behaviour |
+|------|-------|-----------|
+| Clássico | `"classic"` | Standard play |
+| Fácil | `"easy"` | Hit cells reveal the ship's colour; sunk cells darken |
+| Matemática | `"math"` | Player must answer a maths question before each shot; wrong answer = lose turn |
+
 ### Game phases
 
 `lobby` → `placement` → `battle` → `finished`
 
+### Colyseus rooms
+
+| Room | Name | Purpose |
+|------|------|---------|
+| `GameRoom` | `"game"` | One instance per match, `maxClients = 2` |
+| `MatchmakingRoom` | `"matchmaking"` | Shared queue, `maxClients = 100`, `autoDispose = false`; pairs players by mode and creates a `GameRoom` |
+
 ### Colyseus message reference
+
+#### GameRoom (`"game"`)
 
 | Direction | Event | Payload |
 |-----------|-------|---------|
-| c→s | `ready` | — |
+| c→s | `ready` | — (toggle) |
+| c→s | `screen_ready` | — |
 | c→s | `submit_board` | `{ placements: PlacementEntry[] }` |
+| c→s | `cancel_board` | — |
 | c→s | `fire` | `{ sector: number, ring: number }` |
-| c→s | `skip_turn` | — |
-| s→c | `game_start` | `{ firstTurn: string }` |
+| c→s | `skip_turn` | — (math mode: wrong answer) |
+| s→c | `placement_start` | — |
 | s→c | `battle_ready` | `{ firstTurn: string }` |
-| s→c | `shot_result` | `{ shooterId, coord, result: ShotResult }` |
+| s→c | `shot_result` | `{ shooterId, coord, result: ShotResult, hitShipType?: ShipType }` — `hitShipType` only in easy mode on hit |
 | s→c | `game_over` | `{ winner: string }` |
-| s→c | `opponent_abandoned` | — |
+| s→c | `opponent_abandoned` | `{ sessionId, name }` |
+| s→c | `player_left` | `{ sessionId }` |
+| s→c | `error` | `{ code, message }` |
+
+#### MatchmakingRoom (`"matchmaking"`)
+
+| Direction | Event | Payload |
+|-----------|-------|---------|
+| c→s | join options | `{ name: string, mode: string }` |
+| s→c | `match_found` | `{ roomId: string }` |
 
 ### Progress tracking
 
-See `docs/progress.md` for completed and upcoming etapas. Next: Etapa 10 — authentication, player profile, persistent sessions.
+See `docs/progress.md` for completed etapas.

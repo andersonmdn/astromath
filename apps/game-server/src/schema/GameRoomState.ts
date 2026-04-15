@@ -10,7 +10,7 @@ export class PlayerState extends Schema {
 
 export type GamePhase = "lobby" | "placement" | "battle" | "finished";
 
-export type RoomMode = "classic" | "math";
+export type RoomMode = "classic" | "math" | "easy";
 
 export class GameRoomState extends Schema {
   @type({ map: PlayerState }) players = new MapSchema<PlayerState>();

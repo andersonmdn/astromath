@@ -23,7 +23,7 @@ interface RoomState {
   phase: string;
   currentTurn: string;
   winner: string;
-  mode: "classic" | "math";
+  mode: "classic" | "math" | "easy";
 }
 
 export default function RoomPage() {
@@ -36,7 +36,7 @@ export default function RoomPage() {
     phase: "lobby",
     currentTurn: "",
     winner: "",
-    mode: "classic",
+    mode: "classic" as "classic" | "math" | "easy",
   });
   const [myId, setMyId] = useState("");
   const [mounted, setMounted] = useState(false);
@@ -65,7 +65,7 @@ export default function RoomPage() {
       phase: newState.phase ?? "lobby",
       currentTurn: newState.currentTurn ?? "",
       winner: newState.winner ?? "",
-      mode: (newState.mode === "math" ? "math" : "classic") as "classic" | "math",
+      mode: (newState.mode === "math" ? "math" : newState.mode === "easy" ? "easy" : "classic") as "classic" | "math" | "easy",
     });
   }
 

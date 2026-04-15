@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import type { Room } from "@colyseus/sdk";
-import type { Board, CellCoord, ShotResult } from "@astromath/shared";
-import { createBoard, coordsEqual } from "@astromath/shared";
+import type { Board, CellCoord, ShotResult, ShipType } from "@astromath/shared";
+import { createBoard, coordsEqual, SHIP_CONFIGS, INITIAL_FLEET } from "@astromath/shared";
 import { gameStore } from "@/lib/gameStore";
 import { RadialBoard } from "@/components/RadialBoard";
 import { MathQuestion } from "@/components/MathQuestion";
@@ -19,9 +19,16 @@ interface BattleViewProps {
   currentTurn: string;
   winner: string;
   players: PlayerInfo[];
-  mode: "classic" | "math";
+  mode: "classic" | "math" | "easy";
   onReturnToLobby: () => void;
 }
+
+const SHIP_SUNK_COLORS: Record<ShipType, string> = {
+  patrol: "#0c4a6e",
+  recon:  "#7c2d12",
+  multi:  "#4c1d95",
+  combat: "#14532d",
+};
 
 function applyResult(board: Board, result: ShotResult): Board {
   const { type, coord, sunkShip } = result;
@@ -67,6 +74,40 @@ function generateQuestion(): string {
   return `${big} - ${small}`;
 }
 
+function ShipCounter({
+  label,
+  remaining,
+  total,
+  danger = false,
+}: {
+  label: string;
+  remaining: number;
+  total: number;
+  danger?: boolean;
+}) {
+  const pct = (remaining / total) * 100;
+  const barColor = danger
+    ? remaining <= 2 ? "bg-red-500" : "bg-orange-500"
+    : remaining <= 2 ? "bg-red-500" : "bg-indigo-500";
+
+  return (
+    <div className="flex flex-col gap-1 w-[46%]">
+      <div className="flex justify-between text-gray-400">
+        <span>{label}</span>
+        <span className={remaining === 0 ? "text-red-400 font-bold" : "text-white font-semibold"}>
+          {remaining}/{total}
+        </span>
+      </div>
+      <div className="h-1.5 rounded-full bg-gray-800 overflow-hidden">
+        <div
+          className={`h-full rounded-full transition-all duration-300 ${barColor}`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
 export function BattleView({
   room,
   myId,
@@ -77,6 +118,9 @@ export function BattleView({
   onReturnToLobby,
 }: BattleViewProps) {
   const [attackBoard, setAttackBoard] = useState<Board>(createBoard);
+  const [hitColors, setHitColors] = useState<Map<string, string>>(new Map());
+  const [myShipsSunk, setMyShipsSunk] = useState(0);
+  const [opponentShipsSunk, setOpponentShipsSunk] = useState(0);
   const [defenseBoard, setDefenseBoard] = useState<Board>(() => {
     return gameStore.getMyBoard() ?? createBoard();
   });
@@ -97,11 +141,31 @@ export function BattleView({
   useEffect(() => {
     const unsub = room.onMessage(
       "shot_result",
-      (data: { shooterId: string; coord: CellCoord; result: ShotResult }) => {
+      (data: { shooterId: string; coord: CellCoord; result: ShotResult; hitShipType?: ShipType }) => {
         if (data.shooterId === myId) {
           setAttackBoard((prev) => applyResult(prev, data.result));
+          if (data.result.type === "sunk") setOpponentShipsSunk((n) => n + 1);
+
+          // Easy mode: color hit/sunk cells with the ship's color
+          if (mode === "easy") {
+            if (data.result.type === "hit" && data.hitShipType) {
+              const color = SHIP_CONFIGS[data.hitShipType].color;
+              const key = `${data.coord.sector},${data.coord.ring}`;
+              setHitColors((prev) => new Map(prev).set(key, color));
+            } else if (data.result.type === "sunk" && data.result.sunkShip) {
+              const darkColor = SHIP_SUNK_COLORS[data.result.sunkShip.type];
+              setHitColors((prev) => {
+                const next = new Map(prev);
+                data.result.sunkShip!.cells.forEach((c) => {
+                  next.set(`${c.sector},${c.ring}`, darkColor);
+                });
+                return next;
+              });
+            }
+          }
         } else {
           setDefenseBoard((prev) => applyResult(prev, data.result));
+          if (data.result.type === "sunk") setMyShipsSunk((n) => n + 1);
         }
         setLastResult({ ...data.result, shooterId: data.shooterId });
         // Update turn immediately without waiting for onStateChange patch
@@ -216,6 +280,20 @@ export function BattleView({
           </div>
         )}
 
+        <div className="flex justify-between text-xs px-1">
+          <ShipCounter
+            label="Minha frota"
+            remaining={INITIAL_FLEET.length - myShipsSunk}
+            total={INITIAL_FLEET.length}
+            danger
+          />
+          <ShipCounter
+            label="Frota inimiga"
+            remaining={INITIAL_FLEET.length - opponentShipsSunk}
+            total={INITIAL_FLEET.length}
+          />
+        </div>
+
         <div className="flex flex-col gap-6 lg:flex-row lg:gap-8 items-center lg:items-start justify-center">
           <div className="flex flex-col items-center gap-2">
             <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide">
@@ -225,6 +303,7 @@ export function BattleView({
               board={attackBoard}
               interactive={isMyTurn && !activeQuestion}
               onCellClick={handleAttackCell}
+              cellColors={mode === "easy" ? hitColors : undefined}
             />
           </div>
 

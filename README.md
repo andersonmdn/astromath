@@ -1,6 +1,17 @@
 # AstroMath
 
-Jogo de batalha naval matemático multiplayer em tempo real.
+Jogo **inspirado em batalha naval**, ambientado no espaço, multiplayer em tempo real para 2 jogadores. Cada jogador posiciona sua frota num tabuleiro radial (grade circular) e tenta afundar as naves do adversário. Suporte a múltiplas partidas simultâneas via matchmaking automático.
+
+## Funcionalidades
+
+- **Matchmaking automático** — botão "Jogar Agora" enfileira o jogador e cria a partida automaticamente ao encontrar um oponente
+- **Criar/entrar por código** — fluxo manual para partidas privadas
+- **3 modos de jogo:** Clássico, Fácil (cores das naves reveladas ao acertar) e Matemática (responda uma conta para atirar)
+- **Tabuleiro radial SVG** — grade circular 8 setores × 6 anéis, orientações radial e angular
+- **Contador de progresso** — barra de naves restantes de cada lado durante a batalha
+- **Reconexão automática** — queda de rede ou refresh de página não encerram a partida
+- **Ranking e histórico** — partidas persistidas em PostgreSQL via Prisma
+- **Tutorial integrado** — modal passo a passo na primeira visita, reacessível pelo botão "?"
 
 ## Stack
 

@@ -44,7 +44,7 @@ export function ShipSelector({
                   : "bg-gray-800 text-gray-400 hover:bg-gray-700"
               }`}
             >
-              {o === "radial" ? "↑ Radial" : "↻ Angular"}
+              {o === "radial" ? "↑ Em linha" : "↻ Em curva"}
             </button>
           );
         })}

@@ -32,7 +32,8 @@ export class GameRoom extends Room {
   state = new GameRoomState();
 
   onCreate(options: CreateOptions = {}) {
-    this.state.mode = options.mode === "math" ? "math" : "classic";
+    this.state.mode =
+      options.mode === "math" ? "math" : options.mode === "easy" ? "easy" : "classic";
     this.log(`sala criada — modo: ${this.state.mode}`);
 
     this.onMessage("ready", (client: Client) => {
@@ -96,6 +97,17 @@ export class GameRoom extends Room {
       if (!opponentBoard) return;
 
       const coord: CellCoord = { sector: data.sector, ring: data.ring };
+
+      // In easy mode, capture the target ship type before firing (cell state changes after)
+      let hitShipType: string | undefined;
+      if (this.state.mode === "easy") {
+        const targetCell = opponentBoard.cells[data.sector]?.[data.ring];
+        if (targetCell?.shipId) {
+          const ship = opponentBoard.ships.find((s) => s.id === targetCell.shipId);
+          hitShipType = ship?.type;
+        }
+      }
+
       const fired = fireAt(opponentBoard, coord);
       if (!fired) {
         this.sendError(client, "INVALID_TARGET", "Alvo inválido ou já atingido.");
@@ -110,6 +122,7 @@ export class GameRoom extends Room {
         shooterId: client.sessionId,
         coord,
         result: fired.result,
+        ...(hitShipType ? { hitShipType } : {}),
       });
 
       if (isAllSunk(fired.board)) {
