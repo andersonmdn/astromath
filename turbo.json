@@ -3,7 +3,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "outputs": [".next/standalone/**", ".next/static/**", "dist/**"]
     },
     "@astromath/game-server#build": {
       "dependsOn": ["^build", "@astromath/shared#build"],

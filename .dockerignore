@@ -1,0 +1,10 @@
+node_modules
+.next
+.turbo
+dist
+coverage
+.git
+old-project-dont-use
+*.env
+*.env.local
+apps/api/src/generated/
