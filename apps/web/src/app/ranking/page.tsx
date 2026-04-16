@@ -41,10 +41,14 @@ export default async function RankingPage() {
   const [ranking, matches] = await Promise.all([getRanking(), getMatches()]);
 
   return (
-    <main className="min-h-screen bg-gray-950 text-white p-6 max-w-2xl mx-auto">
+    <div className="min-h-screen bg-gray-950 text-white">
+    <main className="max-w-2xl mx-auto p-6">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold">AstroMath</h1>
-        <Link href="/" className="text-sm text-gray-400 hover:text-gray-200">
+        <div>
+          <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">AstroMath</p>
+          <h1 className="text-2xl font-bold">Ranking</h1>
+        </div>
+        <Link href="/" className="text-sm font-medium text-indigo-400 hover:text-indigo-200 transition-colors">
           ← Jogar
         </Link>
       </div>
@@ -106,5 +110,6 @@ export default async function RankingPage() {
         )}
       </section>
     </main>
+    </div>
   );
 }
