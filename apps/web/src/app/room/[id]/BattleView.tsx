@@ -30,6 +30,54 @@ const SHIP_SUNK_COLORS: Record<ShipType, string> = {
   combat: "#14532d",
 };
 
+const FLEET_ORDER: ShipType[] = ["patrol", "recon", "multi", "combat"];
+
+const SHIP_SHORT_LABELS: Record<ShipType, string> = {
+  patrol: "Patrulha",
+  recon:  "Recon.",
+  multi:  "Multif.",
+  combat: "Combate",
+};
+
+function FleetStatus({ label, sunkShips }: { label: string; sunkShips: ShipType[] }) {
+  return (
+    <div className="flex flex-col items-center gap-1.5">
+      <span className="text-xs text-gray-400 font-semibold uppercase tracking-wide">{label}</span>
+      <div className="flex flex-row gap-3 flex-wrap justify-center">
+        {FLEET_ORDER.map((type) => {
+          const config = SHIP_CONFIGS[type];
+          const total = INITIAL_FLEET.filter((t) => t === type).length;
+          const sunkCount = sunkShips.filter((t) => t === type).length;
+          return (
+            <div key={type} className="flex flex-col items-center gap-1">
+              <span className="text-xs text-gray-500">{SHIP_SHORT_LABELS[type]}</span>
+              <div className="flex flex-col gap-1">
+                {Array.from({ length: total }, (_, i) => {
+                  const isSunk = i < sunkCount;
+                  return (
+                    <div key={i} className="flex gap-0.5">
+                      {Array.from({ length: config.size }, (_, j) => (
+                        <div
+                          key={j}
+                          className="h-2.5 w-2.5 rounded-sm transition-all duration-300"
+                          style={{
+                            backgroundColor: isSunk ? SHIP_SUNK_COLORS[type] : config.color,
+                            opacity: isSunk ? 0.35 : 1,
+                          }}
+                        />
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function applyResult(board: Board, result: ShotResult): Board {
   const { type, coord, sunkShip } = result;
 
@@ -74,39 +122,6 @@ function generateQuestion(): string {
   return `${big} - ${small}`;
 }
 
-function ShipCounter({
-  label,
-  remaining,
-  total,
-  danger = false,
-}: {
-  label: string;
-  remaining: number;
-  total: number;
-  danger?: boolean;
-}) {
-  const pct = (remaining / total) * 100;
-  const barColor = danger
-    ? remaining <= 2 ? "bg-red-500" : "bg-orange-500"
-    : remaining <= 2 ? "bg-red-500" : "bg-indigo-500";
-
-  return (
-    <div className="flex flex-col gap-1 w-[46%]">
-      <div className="flex justify-between text-gray-400">
-        <span>{label}</span>
-        <span className={remaining === 0 ? "text-red-400 font-bold" : "text-white font-semibold"}>
-          {remaining}/{total}
-        </span>
-      </div>
-      <div className="h-1.5 rounded-full bg-gray-800 overflow-hidden">
-        <div
-          className={`h-full rounded-full transition-all duration-300 ${barColor}`}
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-    </div>
-  );
-}
 
 export function BattleView({
   room,
@@ -119,8 +134,8 @@ export function BattleView({
 }: BattleViewProps) {
   const [attackBoard, setAttackBoard] = useState<Board>(createBoard);
   const [hitColors, setHitColors] = useState<Map<string, string>>(new Map());
-  const [myShipsSunk, setMyShipsSunk] = useState(0);
-  const [opponentShipsSunk, setOpponentShipsSunk] = useState(0);
+  const [mySunkShips, setMySunkShips] = useState<ShipType[]>([]);
+  const [opponentSunkShips, setOpponentSunkShips] = useState<ShipType[]>([]);
   const [defenseBoard, setDefenseBoard] = useState<Board>(() => {
     return gameStore.getMyBoard() ?? createBoard();
   });
@@ -144,7 +159,8 @@ export function BattleView({
       (data: { shooterId: string; coord: CellCoord; result: ShotResult; hitShipType?: ShipType }) => {
         if (data.shooterId === myId) {
           setAttackBoard((prev) => applyResult(prev, data.result));
-          if (data.result.type === "sunk") setOpponentShipsSunk((n) => n + 1);
+          if (data.result.type === "sunk" && data.result.sunkShip)
+            setOpponentSunkShips((prev) => [...prev, data.result.sunkShip!.type]);
 
           // Easy mode: color hit/sunk cells with the ship's color
           if (mode === "easy") {
@@ -165,16 +181,11 @@ export function BattleView({
           }
         } else {
           setDefenseBoard((prev) => applyResult(prev, data.result));
-          if (data.result.type === "sunk") setMyShipsSunk((n) => n + 1);
+          if (data.result.type === "sunk" && data.result.sunkShip)
+            setMySunkShips((prev) => [...prev, data.result.sunkShip!.type]);
         }
         setLastResult({ ...data.result, shooterId: data.shooterId });
-        // Update turn immediately without waiting for onStateChange patch
-        console.log(`shot_result recebido: ${data.shooterId} atirou em (${data.coord.sector}, ${data.coord.ring}) com resultado ${data.result.type}`);
         const nextTurn = playersRef.current.find((p) => p.id !== data.shooterId)?.id;
-        console.log(players)
-        console.log(playersRef)
-        console.log(data)
-        console.log(`próximo turno: ${nextTurn}`);
         if (nextTurn) setLocalTurn(nextTurn);
       }
     );
@@ -280,34 +291,27 @@ export function BattleView({
           </div>
         )}
 
-        <div className="flex justify-between text-xs px-1">
-          <ShipCounter
-            label="Minha frota"
-            remaining={INITIAL_FLEET.length - myShipsSunk}
-            total={INITIAL_FLEET.length}
-            danger
-          />
-          <ShipCounter
-            label="Frota inimiga"
-            remaining={INITIAL_FLEET.length - opponentShipsSunk}
-            total={INITIAL_FLEET.length}
-          />
-        </div>
-
         <div className="flex flex-col gap-6 lg:flex-row lg:gap-8 items-center lg:items-start justify-center">
-          <div className="flex flex-col items-center gap-2">
+          <div className="flex flex-col items-center gap-2 w-full lg:w-auto">
+            <FleetStatus label="Frota inimiga" sunkShips={opponentSunkShips} />
             <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide">
               Ataque {isMyTurn ? "— clique para atirar" : ""}
             </p>
-            <RadialBoard
-              board={attackBoard}
-              interactive={isMyTurn && !activeQuestion}
-              onCellClick={handleAttackCell}
-              cellColors={mode === "easy" ? hitColors : undefined}
-            />
+            <div
+              className={`rounded-full transition-all duration-300 ${!isMyTurn ? "opacity-50" : ""}`}
+              style={isMyTurn ? { filter: "drop-shadow(0 0 12px #22c55e)" } : undefined}
+            >
+              <RadialBoard
+                board={attackBoard}
+                interactive={isMyTurn && !activeQuestion}
+                onCellClick={handleAttackCell}
+                cellColors={mode === "easy" ? hitColors : undefined}
+              />
+            </div>
           </div>
 
-          <div className="flex flex-col items-center gap-2">
+          <div className="flex flex-col items-center gap-2 w-full lg:w-auto">
+            <FleetStatus label="Minha frota" sunkShips={mySunkShips} />
             <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide">
               Sua defesa
             </p>

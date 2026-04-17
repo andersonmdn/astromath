@@ -7,9 +7,12 @@ import type { Room } from "@colyseus/sdk";
 import { gameClient } from "@/lib/gameClient";
 import { gameStore } from "@/lib/gameStore";
 import { TutorialModal } from "@/components/TutorialModal";
+import { GitHubConnectButton } from "@/components/GitHubConnectButton";
+import { useSession } from "@/contexts/SessionContext";
 
 export default function Home() {
   const router = useRouter();
+  const { player, token, logout } = useSession();
   const [nickname, setNickname] = useState("");
   const [code, setCode] = useState("");
   const [mode, setMode] = useState<"classic" | "math" | "easy">("classic");
@@ -18,6 +21,10 @@ export default function Home() {
   const [queuing, setQueuing] = useState(false);
   const matchmakingRoomRef = useRef<Room | null>(null);
   const [tutorialOpen, setTutorialOpen] = useState(false);
+
+  useEffect(() => {
+    if (player) setNickname(player.name);
+  }, [player]);
 
   useEffect(() => {
     if (!localStorage.getItem("astromath_tutorial_seen")) {
@@ -35,7 +42,7 @@ export default function Home() {
     setLoading(true);
     setError("");
     try {
-      const room = await gameClient.create("game", { name: nickname.trim(), mode });
+      const room = await gameClient.create("game", { name: nickname.trim(), mode, token });
       gameStore.setNickname(nickname.trim());
       gameStore.setRoom(room);
       router.push(`/room/${room.roomId}`);
@@ -51,7 +58,7 @@ export default function Home() {
     setLoading(true);
     setError("");
     try {
-      const room = await gameClient.joinById(code.trim(), { name: nickname.trim() });
+      const room = await gameClient.joinById(code.trim(), { name: nickname.trim(), token });
       gameStore.setNickname(nickname.trim());
       gameStore.setRoom(room);
       router.push(`/room/${room.roomId}`);
@@ -69,6 +76,7 @@ export default function Home() {
       const mqRoom = await gameClient.joinOrCreate("matchmaking", {
         name: nickname.trim(),
         mode,
+        token,
       });
       matchmakingRoomRef.current = mqRoom;
       setQueuing(true);
@@ -76,7 +84,7 @@ export default function Home() {
 
       mqRoom.onMessage("match_found", async ({ roomId }: { roomId: string }) => {
         try {
-          const gameRoom = await gameClient.joinById(roomId, { name: nickname.trim() });
+          const gameRoom = await gameClient.joinById(roomId, { name: nickname.trim(), token });
           gameStore.setNickname(nickname.trim());
           gameStore.setRoom(gameRoom);
           mqRoom.leave();
@@ -105,6 +113,21 @@ export default function Home() {
       <TutorialModal open={tutorialOpen} onClose={closeTutorial} />
 
       <div className="w-full max-w-sm space-y-6">
+        {player && (
+          <div className="flex items-center justify-between rounded bg-gray-800/60 px-3 py-2">
+            <div className="flex flex-col gap-1">
+              <span className="text-sm font-medium text-white">{player.name}</span>
+              <GitHubConnectButton githubLogin={player.githubLogin} />
+            </div>
+            <button
+              onClick={logout}
+              className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+            >
+              Sair
+            </button>
+          </div>
+        )}
+
         <div className="flex items-center justify-center relative">
           <h1 className="text-3xl font-bold tracking-tight">AstroMath</h1>
           <button
