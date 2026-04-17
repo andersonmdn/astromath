@@ -2,6 +2,7 @@ import { Room, Client } from "colyseus";
 import { GameRoomState, PlayerState } from "../schema/GameRoomState.js";
 import { createBoard, placeShip, registerBoard, fireAt, isAllSunk } from "@astromath/shared";
 import type { Board, ShipType, Orientation, CellCoord } from "@astromath/shared";
+import { verifyPlayerToken } from "../lib/auth.js";
 
 interface CreateOptions {
   mode?: string;
@@ -9,6 +10,7 @@ interface CreateOptions {
 
 interface JoinOptions {
   name?: string;
+  token?: string;
 }
 
 interface PlacementEntry {
@@ -28,7 +30,8 @@ const RECONNECTION_TIMEOUT = Number(process.env.RECONNECTION_TIMEOUT ?? 30);
 export class GameRoom extends Room {
   maxClients = 2;
   private playerBoards = new Map<string, Board>();
-  
+  private playerIds = new Map<string, string>(); // sessionId → playerId from JWT
+
   state = new GameRoomState();
 
   onCreate(options: CreateOptions = {}) {
@@ -132,10 +135,14 @@ export class GameRoom extends Room {
         const allPlayers = Array.from(this.state.players.values());
         const winnerName = this.state.players.get(client.sessionId)?.name;
         this.log(`fim de jogo — vencedor: ${winnerName}`);
+        const allSessionIds = Array.from(this.state.players.keys());
         this.saveMatch(
           allPlayers[0]?.name ?? "",
           allPlayers[1]?.name ?? "",
-          winnerName
+          winnerName,
+          this.playerIds.get(allSessionIds[0]),
+          this.playerIds.get(allSessionIds[1]),
+          this.playerIds.get(client.sessionId),
         );
         return;
       }
@@ -176,6 +183,15 @@ export class GameRoom extends Room {
   }
 
   onJoin(client: Client, options: JoinOptions = {}) {
+    if (options.token) {
+      const payload = verifyPlayerToken(options.token);
+      if (!payload) {
+        client.leave(4001, "Token inválido");
+        return;
+      }
+      this.playerIds.set(client.sessionId, payload.playerId);
+    }
+
     const player = new PlayerState();
     player.id = client.sessionId;
     player.name = options.name?.trim() || `Player ${this.state.players.size + 1}`;
@@ -223,6 +239,7 @@ export class GameRoom extends Room {
   private removePlayer(client: Client) {
     this.state.players.delete(client.sessionId);
     this.playerBoards.delete(client.sessionId);
+    this.playerIds.delete(client.sessionId);
 
     if (this.state.phase !== "lobby") {
       this.state.phase = "lobby";
@@ -255,12 +272,27 @@ export class GameRoom extends Room {
     this.log(`erro enviado para ${client.sessionId}: [${code}] ${message}`);
   }
 
-  private saveMatch(player1Name: string, player2Name: string, winnerName?: string) {
+  private saveMatch(
+    player1Name: string,
+    player2Name: string,
+    winnerName?: string,
+    player1Id?: string,
+    player2Id?: string,
+    winnerId?: string,
+  ) {
     const apiUrl = process.env.API_URL ?? "http://localhost:3001";
     fetch(`${apiUrl}/matches`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ roomId: this.roomId, player1Name, player2Name, winnerName }),
+      body: JSON.stringify({
+        roomId: this.roomId,
+        player1Name,
+        player2Name,
+        winnerName,
+        player1Id,
+        player2Id,
+        winnerId,
+      }),
     }).catch((e: unknown) => this.log(`falha ao salvar partida: ${e}`));
   }
 

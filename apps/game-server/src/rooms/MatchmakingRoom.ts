@@ -1,11 +1,13 @@
 import { Room, Client, matchMaker } from "colyseus";
+import { verifyPlayerToken } from "../lib/auth.js";
 
 interface JoinOptions {
   name?: string;
   mode?: string;
+  token?: string;
 }
 
-type QueueEntry = { client: Client; name: string };
+type QueueEntry = { client: Client; name: string; playerId?: string };
 
 export class MatchmakingRoom extends Room {
   maxClients = 100;
@@ -14,13 +16,23 @@ export class MatchmakingRoom extends Room {
   private queues = new Map<string, QueueEntry[]>();
 
   onJoin(client: Client, options: JoinOptions = {}) {
+    if (options.token) {
+      const payload = verifyPlayerToken(options.token);
+      if (!payload) {
+        client.leave(4001, "Token inválido");
+        return;
+      }
+      (client as unknown as Record<string, unknown>)._playerId = payload.playerId;
+    }
+
     const name = options.name?.trim() || `Player`;
     const mode = options.mode === "math" ? "math" : options.mode === "easy" ? "easy" : "classic";
+    const playerId = (client as unknown as Record<string, string | undefined>)._playerId;
 
     (client as unknown as Record<string, unknown>)._matchOptions = { name, mode };
 
     if (!this.queues.has(mode)) this.queues.set(mode, []);
-    this.queues.get(mode)!.push({ client, name });
+    this.queues.get(mode)!.push({ client, name, playerId });
 
     this.log(`${name} entrou na fila (modo: ${mode}, tamanho: ${this.queues.get(mode)!.length})`);
     this.tryMatch(mode);

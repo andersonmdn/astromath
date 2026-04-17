@@ -15,12 +15,14 @@
     "@colyseus/monitor": "^0.17.8",
     "@colyseus/schema": "^4.0.8",
     "@colyseus/ws-transport": "^0.17.13",
-    "colyseus": "^0.17.8"
+    "colyseus": "^0.17.8",
+    "jsonwebtoken": "^9.0.3"
   },
   "devDependencies": {
     "@astromath/config": "workspace:*",
-    "@types/node": "^22.10.7",
     "@colyseus/sdk": "^0.17.26",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^22.10.7",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3"
   }
