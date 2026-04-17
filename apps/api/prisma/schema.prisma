@@ -8,9 +8,12 @@ datasource db {
 }
 
 model Player {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  name        String   @unique
+  pin         String?  // hash bcrypt — null se conta GitHub pura
+  githubId    String?  @unique
+  githubLogin String?  // username GitHub para exibição
+  createdAt   DateTime @default(now())
 
   matchesAsP1 Match[] @relation("Player1")
   matchesAsP2 Match[] @relation("Player2")

@@ -8,4 +8,11 @@ dist
 # Prisma generated client
 apps/api/src/generated/
 
+# Others
 old-project-dont-use/
+tsx-1000/
+docs/
+.claude/skills/
+
+# Obsidian vault (local only)
+.obsidian/
