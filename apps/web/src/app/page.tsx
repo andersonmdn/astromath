@@ -41,6 +41,7 @@ export default function Home() {
       gameStore.setRoom(room);
       router.push(`/room/${room.roomId}`);
     } catch (e) {
+      console.error("[createRoom]", e);
       setError("Erro ao criar sala.");
       setLoading(false);
     }
@@ -57,6 +58,7 @@ export default function Home() {
       gameStore.setRoom(room);
       router.push(`/room/${room.roomId}`);
     } catch (e) {
+      console.error("[joinRoom]", e);
       setError("Sala não encontrada ou já está cheia.");
       setLoading(false);
     }
@@ -84,13 +86,15 @@ export default function Home() {
           mqRoom.leave();
           matchmakingRoomRef.current = null;
           router.push(`/room/${roomId}`);
-        } catch {
+        } catch (e) {
+          console.error("[match_found joinById]", e);
           setError("Erro ao entrar na partida. Tente novamente.");
           setQueuing(false);
           matchmakingRoomRef.current = null;
         }
       });
-    } catch {
+    } catch (e) {
+      console.error("[joinMatchmaking]", e);
       setError("Erro ao entrar na fila.");
       setLoading(false);
     }

@@ -149,7 +149,8 @@ export default function RoomPage() {
             setupRoom(newRoom);
             setReconnecting(false);
           })
-          .catch(() => {
+          .catch((e: unknown) => {
+            console.error("[reconnect onLeave]", e);
             if (!active) return;
             sessionStorage.removeItem(reconnectKey(id));
             gameStore.clearRoom();
@@ -184,7 +185,8 @@ export default function RoomPage() {
         gameStore.setRoom(room);
         setupRoom(room);
       })
-      .catch(() => {
+      .catch((e: unknown) => {
+        console.error("[reconnect init]", e);
         if (!active) return;
         sessionStorage.removeItem(reconnectKey(id));
         router.replace("/");
