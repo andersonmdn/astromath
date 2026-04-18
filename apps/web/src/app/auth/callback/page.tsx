@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import { AuthCallbackClient } from "./AuthCallbackClient";
 
+export const dynamic = "force-dynamic";
+
 function LoadingFallback() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-950 text-white">
