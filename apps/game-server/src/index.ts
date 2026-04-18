@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { Server } from "colyseus";
 import { WebSocketTransport } from "@colyseus/ws-transport";
 import { createServer } from "http";
