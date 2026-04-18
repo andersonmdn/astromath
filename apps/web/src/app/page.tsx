@@ -7,13 +7,11 @@ import type { Room } from "@colyseus/sdk";
 import { gameClient } from "@/lib/gameClient";
 import { gameStore } from "@/lib/gameStore";
 import { TutorialModal } from "@/components/TutorialModal";
-import { GitHubConnectButton } from "@/components/GitHubConnectButton";
 import { useSession } from "@/contexts/SessionContext";
 
 export default function Home() {
   const router = useRouter();
   const { player, token, logout } = useSession();
-  const [nickname, setNickname] = useState("");
   const [code, setCode] = useState("");
   const [mode, setMode] = useState<"classic" | "math" | "easy">("classic");
   const [error, setError] = useState("");
@@ -21,10 +19,6 @@ export default function Home() {
   const [queuing, setQueuing] = useState(false);
   const matchmakingRoomRef = useRef<Room | null>(null);
   const [tutorialOpen, setTutorialOpen] = useState(false);
-
-  useEffect(() => {
-    if (player) setNickname(player.name);
-  }, [player]);
 
   useEffect(() => {
     if (!localStorage.getItem("astromath_tutorial_seen")) {
@@ -38,12 +32,12 @@ export default function Home() {
   }
 
   async function createRoom() {
-    if (!nickname.trim()) return setError("Informe um nickname.");
+    if (!(player?.name ?? "").trim()) return setError("Informe um nickname.");
     setLoading(true);
     setError("");
     try {
-      const room = await gameClient.create("game", { name: nickname.trim(), mode, token });
-      gameStore.setNickname(nickname.trim());
+      const room = await gameClient.create("game", { name: (player?.name ?? "").trim(), mode, token });
+      gameStore.setNickname((player?.name ?? "").trim());
       gameStore.setRoom(room);
       router.push(`/room/${room.roomId}`);
     } catch (e) {
@@ -53,13 +47,13 @@ export default function Home() {
   }
 
   async function joinRoom() {
-    if (!nickname.trim()) return setError("Informe um nickname.");
+    if (!(player?.name ?? "").trim()) return setError("Informe um nickname.");
     if (!code.trim()) return setError("Informe o código da sala.");
     setLoading(true);
     setError("");
     try {
-      const room = await gameClient.joinById(code.trim(), { name: nickname.trim(), token });
-      gameStore.setNickname(nickname.trim());
+      const room = await gameClient.joinById(code.trim(), { name: (player?.name ?? "").trim(), token });
+      gameStore.setNickname((player?.name ?? "").trim());
       gameStore.setRoom(room);
       router.push(`/room/${room.roomId}`);
     } catch (e) {
@@ -69,12 +63,12 @@ export default function Home() {
   }
 
   async function joinMatchmaking() {
-    if (!nickname.trim()) return setError("Informe um nickname.");
+    if (!(player?.name ?? "").trim()) return setError("Informe um nickname.");
     setLoading(true);
     setError("");
     try {
       const mqRoom = await gameClient.joinOrCreate("matchmaking", {
-        name: nickname.trim(),
+        name: (player?.name ?? "").trim(),
         mode,
         token,
       });
@@ -84,8 +78,8 @@ export default function Home() {
 
       mqRoom.onMessage("match_found", async ({ roomId }: { roomId: string }) => {
         try {
-          const gameRoom = await gameClient.joinById(roomId, { name: nickname.trim(), token });
-          gameStore.setNickname(nickname.trim());
+          const gameRoom = await gameClient.joinById(roomId, { name: (player?.name ?? "").trim(), token });
+          gameStore.setNickname((player?.name ?? "").trim());
           gameStore.setRoom(gameRoom);
           mqRoom.leave();
           matchmakingRoomRef.current = null;
@@ -115,10 +109,7 @@ export default function Home() {
       <div className="w-full max-w-sm space-y-6">
         {player && (
           <div className="flex items-center justify-between rounded bg-gray-800/60 px-3 py-2">
-            <div className="flex flex-col gap-1">
-              <span className="text-sm font-medium text-white">{player.name}</span>
-              <GitHubConnectButton githubLogin={player.githubLogin} />
-            </div>
+            <span className="text-sm font-medium text-white">{player.name}</span>
             <button
               onClick={logout}
               className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
@@ -137,19 +128,6 @@ export default function Home() {
           >
             ?
           </button>
-        </div>
-
-        <div>
-          <label className="block text-sm text-gray-400 mb-1">Nickname</label>
-          <input
-            className="w-full rounded bg-gray-800 px-3 py-2 text-white outline-none focus:ring-2 focus:ring-indigo-500"
-            placeholder="Seu nickname"
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && createRoom()}
-            maxLength={20}
-            disabled={queuing}
-          />
         </div>
 
         <div>
