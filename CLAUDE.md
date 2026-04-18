@@ -75,11 +75,29 @@ packages/config   Base tsconfig files (base, node, nextjs)
 { "extends": "../../packages/config/tsconfig/nextjs.json" }
 ```
 
+### Prisma 7 — configuração de conexão
+
+**Não colocar `url` ou `directUrl` em `schema.prisma`.** No Prisma 7, a URL vai em `apps/api/prisma.config.ts`:
+
+```ts
+import { defineConfig } from "prisma/config";
+export default defineConfig({
+  schema: "prisma/schema.prisma",
+  datasource: { url: process.env.DIRECT_URL! }, // CLI usa DIRECT_URL (sem pooler)
+});
+```
+
+- `schema.prisma` declara só `provider` — sem `url`/`directUrl`
+- `DATABASE_URL` (pooler, porta 6543) = usado pelo runtime Prisma Client
+- `DIRECT_URL` (direto, porta 5432) = usado pela CLI (`db:migrate`, `db:push`, `db:generate`)
+- Ambas as URLs precisam de `?sslmode=require` quando conectando ao Supabase
+
 ### Environment variables
 
 | File | Variable | Default |
 |------|----------|---------|
-| `apps/api/.env` | `DATABASE_URL` | — (required) |
+| `apps/api/.env` | `DATABASE_URL` | — (pooler Supabase porta 6543, runtime) |
+| `apps/api/.env` | `DIRECT_URL` | — (direto Supabase porta 5432, CLI) |
 | `apps/game-server/.env` | `API_URL` | `http://localhost:3001` |
 | `apps/game-server/.env` | `RECONNECTION_TIMEOUT` | `30` (seconds) |
 
