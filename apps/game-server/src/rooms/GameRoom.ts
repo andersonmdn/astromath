@@ -186,8 +186,7 @@ export class GameRoom extends Room {
     if (options.token) {
       const payload = verifyPlayerToken(options.token);
       if (!payload) {
-        client.leave(4001, "Token inválido");
-        return;
+        throw new Error("Token inválido");
       }
       this.playerIds.set(client.sessionId, payload.playerId);
     }

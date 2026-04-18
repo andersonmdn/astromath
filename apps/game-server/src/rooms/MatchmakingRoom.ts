@@ -19,8 +19,7 @@ export class MatchmakingRoom extends Room {
     if (options.token) {
       const payload = verifyPlayerToken(options.token);
       if (!payload) {
-        client.leave(4001, "Token inválido");
-        return;
+        throw new Error("Token inválido");
       }
       (client as unknown as Record<string, unknown>)._playerId = payload.playerId;
     }
